@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculateur de Jets de Dés</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="sidebar">
+    <h3>Stats du personnage</h3>
+    <div id="statsPerso">Sélectionnez un personnage</div>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>Calculateur de Jets de Dés</h2>
+      <label for="personnage">Personnage :</label>
+      <select id="personnage">
+        <option value="brakmar" data-for="10" data-agi="3" data-int="5" data-end="8" data-cha="6" 
+        data-bonusfor="2" data-bonusagi="0" data-bonusint="1" data-bonusend="1"data-bonuscha="1" 
+        data-combatcac="1" data-combatdist="0">Brakmar</option>
+        <option value="draner" data-for="5" data-agi="10" data-int="5" data-end="6" data-cha="6" 
+        data-bonusfor="1" data-bonusagi="2" data-bonusint="1" data-bonusend="1" data-bonuscha="1" 
+        data-combatcac="0" data-combatdist="1">Drânër</option>
+      </select>
+
+      <label for="bonusContext">Bonus/Malus contextuel :</label>
+      <input type="number" id="bonusContext" value="0" />
+
+      <label for="arme">Arme / Test :</label>
+      <select id="arme">
+        <optgroup label="Armes de corps à corps">
+          <option value="1d10" data-type="cac">Marteau de guerre (1d10)</option>      
+          <option value="1d8-1" data-type="cac">Rapière (1d8-1)</option>
+          <option value="1d6" data-type="cac">Épée courte (1d6)</option>
+          <option value="1d8" data-type="cac">Épée longue (1d8)</option>
+          <option value="1d10" data-type="cac">Hache lourde (1d10)</option>
+        </optgroup>
+        <optgroup label="Armes à distance">
+          <option value="1d6" data-type="distance">Arc court (1d6)</option>
+          <option value="1d8" data-type="distance">Arc long (1d8)</option>
+        </optgroup>
+        <optgroup label="Tests">
+          <option value="1d20" data-type="test" data-stat="for">Force</option>
+          <option value="1d20" data-type="test" data-stat="agi">Agilité</option>
+          <option value="1d20" data-type="test" data-stat="int">Intelligence</option>
+          <option value="1d20" data-type="test" data-stat="end">Endurance</option>
+          <option value="1d20" data-type="test" data-stat="cha">Charisme</option>
+        </optgroup>
+      </select>
+
+      <label for="seuilToucher">Seuil de réussite :</label>
+      <input type="number" id="seuilToucher" value="10" min="1" max="20" />
+
+      <button onclick="lancerDe()">Lancer le dé</button>
+
+      <div id="resultat"></div>
+      <div id="resume"></div>
+      <h3>Historique des lancers</h3>
+      <div id="historique"></div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
