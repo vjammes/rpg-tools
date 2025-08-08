@@ -99,11 +99,11 @@ function lancerDe() {
 
   if (armeType === "cac") {
 
-  const jetToucherObj = { total: 20, rolls: [20] }; // Simule un vrai jet de 20
-  jetToucher = 20; // Valeur à simuler
+  // const jetToucherObj = { total: 20, rolls: [20] }; // Simule un vrai jet de 20
+  // jetToucher = 20; // Valeur à simuler
 
-  // const jetToucherObj = rollDice("1d20");
-  // jetToucher = jetToucherObj.total;
+  const jetToucherObj = rollDice("1d20");
+  jetToucher = jetToucherObj.total;
 
   if (jetToucher === 1) echecCritique = true;
   if (jetToucher === 20) successCritique = true;
