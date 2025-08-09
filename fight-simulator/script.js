@@ -17,6 +17,11 @@ function afficherStats() {
   const intVal = opt.dataset.int;
   const endVal = opt.dataset.end;
   const chaVal = opt.dataset.cha;
+  const niveau = opt.dataset.niveau;
+  const ca = opt.dataset.ca;
+  const reducphy = parseInt(opt.dataset.reducphy);
+  const reducmag = parseInt(opt.dataset.reducmag);
+  const pvMax = parseInt(opt.dataset.pv);
   const bonusFor = parseInt(opt.dataset.bonusfor);
   const bonusAgi = parseInt(opt.dataset.bonusagi);
   const bonusInt = parseInt(opt.dataset.bonusint);
@@ -25,21 +30,32 @@ function afficherStats() {
   const combatCac = parseInt(opt.dataset.combatcac);
   const combatDist = parseInt(opt.dataset.combatdist);
 
+// Met à jour pvActuel si on change de personnage
+  pvActuel = pvMax;
+
+
   statsDiv.innerHTML = `
-    <table>
-      <tr><th>Caractéristique</th><th>Stats</th><th>Bonus test</th></tr>
-      <tr><td>FOR</td><td>${forVal}</td><td>${bonusFor}</td></tr>
-      <tr><td>AGI</td><td>${agilVal}</td><td>${bonusAgi}</td></tr>
-      <tr><td>INT</td><td>${intVal}</td><td>${bonusInt}</td></tr>
-      <tr><td>END</td><td>${endVal}</td><td>${bonusEnd}</td></tr>
-      <tr><td>CHA</td><td>${chaVal}</td><td>${bonusCha}</td></tr>
-    </table>
-    <table>
-      <tr><th>Bonus Combat</th><th>CàC</th><th>Distance</th></tr>
-      <tr><td></td><td>${combatCac}</td><td>${combatDist}</td></tr>
-    </table>
-  `;
-}
+      <table>
+        <tr><th>Caractéristique</th><th>Stats</th><th>Bonus test</th></tr>
+        <tr><td>FOR</td><td>${forVal}</td><td>${bonusFor}</td></tr>
+        <tr><td>AGI</td><td>${agilVal}</td><td>${bonusAgi}</td></tr>
+        <tr><td>INT</td><td>${intVal}</td><td>${bonusInt}</td></tr>
+        <tr><td>END</td><td>${endVal}</td><td>${bonusEnd}</td></tr>
+        <tr><td>CHA</td><td>${chaVal}</td><td>${bonusCha}</td></tr>
+      </table>
+      <table>
+        <tr><th>Bonus Combat</th><th>CàC</th><th>Distance</th></tr>
+        <tr><td></td><td>${combatCac}</td><td>${combatDist}</td></tr>
+      </table>
+      <table>
+        <tr><th>Niveau</th><td>${niveau}</td></tr>
+        <tr><th>Classe d'armure</th><td>${ca}</td></tr>
+        <tr><th>Réd. dégâts physiques</th><td>${reducphy}</td></tr>
+        <tr><th>Réd. dégâts magiques</th><td>${reducmag}</td></tr>
+        <tr><th>PV max</th><td>${pvMax}</td></tr>
+      </table>
+    `;
+  }
 persoSelect.addEventListener('change', afficherStats);
 afficherStats();
 
@@ -280,3 +296,13 @@ function updateTestLabels() {
   updateTestLabels();
 });
 
+document.addEventListener("DOMContentLoaded", function () {
+  const btn = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+
+  if (!btn || !sidebar) return;
+
+  btn.addEventListener("click", function () {
+    sidebar.classList.toggle("open");
+  });
+});

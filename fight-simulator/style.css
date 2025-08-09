@@ -122,3 +122,74 @@ optgroup[label="Tests"] {
   font-weight: bold;
   color: #2a7f2a;
 }
+sidebar {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 0 15px 15px 0;
+  overflow-y: auto;
+  transition: max-height 0.28s ease, padding 0.28s ease;
+}
+
+.container {
+  flex: 1;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+/* bouton menu caché par défaut (desktop) */
+.menu-toggle {
+  display: none;
+}
+
+/* === Mobile : fermer la sidebar par défaut, bouton visible === */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+    height: auto;
+  }
+
+  /* bouton visible sur mobile */
+  .menu-toggle {
+    display: block;
+    background: #16406A;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1.05rem;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  /* sidebar fermée par défaut (sur mobile) */
+  .sidebar {
+    width: 100%;
+    max-height: 0;        /* cachée */
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    border-radius: 0;
+  }
+
+  /* quand on ajoute .open elle se déroule */
+  .sidebar.open {
+    max-height: 800px;   /* maxi raisonnable pour le contenu */
+    padding: 20px;
+  }
+
+  /* réduire padding du container mobile */
+  .container {
+    padding: 15px;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+}

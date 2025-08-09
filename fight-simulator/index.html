@@ -7,10 +7,15 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <button id="menuToggle" class="menu-toggle">☰ Menu</button>
   <div class="sidebar">
-    <h3>Stats du personnage</h3>
-    <div id="statsPerso">Sélectionnez un personnage</div>
-  </div>
+  <h3>Stats du personnage</h3>
+  <div id="statsPerso">Sélectionnez un personnage</div>
+</div>
+
+  <!-- Overlay sombre derrière la sidebar -->
+  <div class="overlay"></div>
+
   <div class="container">
     <div class="card">
       <h2>Calculateur de Jets de Dés</h2>
@@ -18,10 +23,12 @@
       <select id="personnage">
         <option value="brakmar" data-for="10" data-agi="3" data-int="5" data-end="8" data-cha="6" 
         data-bonusfor="2" data-bonusagi="0" data-bonusint="1" data-bonusend="1"data-bonuscha="1" 
-        data-combatcac="1" data-combatdist="0">Brakmar</option>
+        data-combatcac="1" data-combatdist="0" 
+        data-niveau="11" data-ca="13" data-reducphy="2" data-reducmag="0" data-pv="25">Brakmar</option>
         <option value="draner" data-for="5" data-agi="10" data-int="5" data-end="6" data-cha="6" 
-        data-bonusfor="1" data-bonusagi="2" data-bonusint="1" data-bonusend="1" data-bonuscha="1" 
-        data-combatcac="0" data-combatdist="1">Drânër</option>
+        data-bonusfor="1" data-bonusagi="2" data-bonusint="1" data-bonusend="1" data-bonuscha="1"
+        data-combatcac="0" data-combatdist="1"
+        data-niveau="11" data-ca="10" data-reducphy="1" data-reducmag="0" data-pv="16">Drânër</option>
       </select>
 
       <label for="bonusContext">Bonus/Malus contextuel :</label>
