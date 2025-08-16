@@ -686,3 +686,19 @@ if (tabButtons.length && tabContents.length) {
   if (initial) initial.style.display = '';
 }
   });
+
+const tabs = document.querySelectorAll('.tab-button');
+const contents = document.querySelectorAll('.tab-content');
+
+tabs.forEach((tab, idx) => {
+  tab.addEventListener('click', () => {
+    // Reset tous les tabs et contenus
+    tabs.forEach(t => t.classList.remove('active'));
+    contents.forEach(c => c.classList.remove('active'));
+
+    // Activer le tab cliqué
+    tab.classList.add('active');
+    contents[idx].classList.add('active');
+  });
+});
+
