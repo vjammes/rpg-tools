@@ -9,63 +9,186 @@
 <body>
   <button id="menuToggle" class="menu-toggle">☰ Menu</button>
   <div class="sidebar">
-  <h3>Stats du personnage</h3>
-  <div id="statsPerso">Sélectionnez un personnage</div>
-</div>
+    <div class="sidebar-header">
+      <h3 id="statsTitle"></h3>
+      <button type="button" class="close-sidebar" aria-label="Fermer le menu">×</button>
+    </div>
+
+    <div id="statsPerso">Sélectionnez un personnage</div>
+  </div>
+
 
   <!-- Overlay sombre derrière la sidebar -->
   <div class="overlay"></div>
 
   <div class="container">
-    <div class="card">
-      <h2>Calculateur de Jets de Dés</h2>
-      <label for="personnage">Personnage :</label>
-      <select id="personnage">
-        <option value="brakmar" data-for="10" data-agi="3" data-int="5" data-end="8" data-cha="6" 
-        data-bonusfor="2" data-bonusagi="0" data-bonusint="1" data-bonusend="1"data-bonuscha="1" 
-        data-combatcac="1" data-combatdist="0" 
-        data-niveau="11" data-ca="13" data-reducphy="2" data-reducmag="0" data-pv="25">Brakmar</option>
-        <option value="draner" data-for="5" data-agi="10" data-int="5" data-end="6" data-cha="6" 
-        data-bonusfor="1" data-bonusagi="2" data-bonusint="1" data-bonusend="1" data-bonuscha="1"
-        data-combatcac="0" data-combatdist="1"
-        data-niveau="11" data-ca="10" data-reducphy="1" data-reducmag="0" data-pv="16">Drânër</option>
-      </select>
 
-      <label for="bonusContext">Bonus/Malus contextuel :</label>
-      <input type="number" id="bonusContext" value="0" />
-
-      <label for="arme">Arme / Test :</label>
-      <select id="arme">
-        <optgroup label="Armes de corps à corps">
-          <option value="1d10" data-type="cac">Marteau de guerre (1d10)</option>      
-          <option value="1d8-1" data-type="cac">Rapière (1d8-1)</option>
-          <option value="1d6" data-type="cac">Épée courte (1d6)</option>
-          <option value="1d8" data-type="cac">Épée longue (1d8)</option>
-          <option value="1d10" data-type="cac">Hache lourde (1d10)</option>
-        </optgroup>
-        <optgroup label="Armes à distance">
-          <option value="1d6" data-type="distance">Arc court (1d6)</option>
-          <option value="1d8" data-type="distance">Arc long (1d8)</option>
-        </optgroup>
-        <optgroup label="Tests">
-          <option value="1d20" data-type="test" data-stat="for">Force</option>
-          <option value="1d20" data-type="test" data-stat="agi">Agilité</option>
-          <option value="1d20" data-type="test" data-stat="int">Intelligence</option>
-          <option value="1d20" data-type="test" data-stat="end">Endurance</option>
-          <option value="1d20" data-type="test" data-stat="cha">Charisme</option>
-        </optgroup>
-      </select>
-
-      <label for="seuilToucher">Seuil de réussite :</label>
-      <input type="number" id="seuilToucher" value="10" min="1" max="20" />
-
-      <button onclick="lancerDe()">Lancer le dé</button>
-
-      <div id="resultat"></div>
-      <div id="resume"></div>
-      <h3>Historique des lancers</h3>
-      <div id="historique"></div>
+    <!-- Onglets -->
+    <div class="tabs">
+      <button class="tab-button active" data-tab="perso">🎲 </br>Personnages</button>
+      <button class="tab-button" data-tab="ennemi">👹 </br>Ennemis</button>
+      <button class="tab-button" data-tab="chasse">🏹 </br>Chasse</button>
     </div>
+
+    <!-- Onglet Personnages -->
+    <div id="tab-perso" class="tab-content active">
+      <div class="card">
+        <h2>Attaque d'un personnage</h2>
+        <label for="personnage">Personnage :</label>
+        <select id="personnage">
+          <option value="brakmar" data-for="10" data-agi="3" data-int="5" data-end="8" data-cha="6"
+           data-bonusfor="2" data-bonusagi="0" data-bonusint="1" data-bonusend="1" data-bonuscha="1"
+           data-combatcac="1" data-combatdist="0" data-tacle="2" data-esquive="0"
+           data-niveau="11" data-ca="13" data-reducphy="2" data-reducmag="0" data-pv="25">Brakmar</option>
+          <option value="draner" data-for="5" data-agi="10" data-int="5" data-end="6" data-cha="6"
+           data-bonusfor="1" data-bonusagi="2" data-bonusint="1" data-bonusend="1" data-bonuscha="1"
+           data-combatcac="0" data-combatdist="1" data-tacle="1" data-esquive="2"
+           data-niveau="11" data-ca="10" data-reducphy="1" data-reducmag="0" data-pv="16">Drânër</option>
+        </select>
+
+        <label for="bonusContext">Bonus/Malus contextuel :</label>
+        <input type="number" id="bonusContext" value="0" />
+
+        <label for="arme">Arme / Test :</label>
+        <select id="arme">
+          <optgroup label="Armes de corps à corps">
+            <option value="1d10" data-type="cac">Marteau de guerre (1d10)</option>
+            <option value="1d8-1" data-type="cac">Rapière (1d8-1)</option>
+            <option value="1d6" data-type="cac">Épée courte (1d6)</option>
+            <option value="1d8" data-type="cac">Épée longue (1d8)</option>
+          </optgroup>
+          <optgroup label="Armes à distance">
+            <option value="1d6" data-type="distance">Arc court (1d6)</option>
+            <option value="1d8" data-type="distance">Arc long (1d8)</option>
+          </optgroup>
+          <optgroup label="Tests">
+            <option value="1d20" data-type="test" data-stat="for">Force</option>
+            <option value="1d20" data-type="test" data-stat="agi">Agilité</option>
+            <option value="1d20" data-type="test" data-stat="int">Intelligence</option>
+            <option value="1d20" data-type="test" data-stat="end">Endurance</option>
+            <option value="1d20" data-type="test" data-stat="cha">Charisme</option>
+          </optgroup>
+        </select>
+
+        <label for="reduceDamage">Réduction des dégâts :</label>
+        <input type="number" id="reduceDamage" value="0" min="0" max="10" />
+
+        <label for="seuilToucher">Seuil de réussite :</label>
+        <input type="number" id="seuilToucher" value="10" min="1" max="20" />
+
+        <button onclick="lancerDe()">Lancer le dé</button>
+
+        <div id="resultat"></div>
+        <div id="resume"></div>
+      </div>
+    </div>
+
+    <!-- Onglet Ennemis -->
+    <div id="tab-ennemi" class="tab-content">
+      <div class="card">
+        <h2>Attaque d'un PNJ</h2>
+
+        <label for="nomPNJ">Nom du PNJ :</label>
+        <input type="text" id="nomPNJ" placeholder="ex : Barbare sanguinaire">
+
+        <label for="typePNJSelect">Type d'attaque :</label>
+        <select id="typePNJSelect">
+          <option value="cac">Corps à corps</option>
+          <option value="distance">À distance</option>
+        </select>
+
+        <div id="ctPNJContainer" style="display: none;">
+          <label for="ctPNJ">Capacité de tir (CT) :</label>
+          <input type="number" id="ctPNJ" min="0" max="10" value="3">
+        </div>
+
+        <label for="attaquePNJ">Nom de l'attaque :</label>
+        <input type="text" id="attaquePNJ" placeholder="ex : Épée rouillée">
+
+        <label for="degatsPNJ">Dégâts (ex: 2d6+1) :</label>
+        <input type="text" id="degatsPNJ" placeholder="2d6+1">
+
+        <label for="typePNJSelect">Type de dégâts</label>
+        <select id="typePNJSelect">
+          <option value="physique">Physique</option>
+          <option value="magique">Magique</option>
+        </select>
+
+        <label for="ciblePNJ">Cible :</label>
+        <select id="ciblePNJ">
+          <option value="brakmar">Brakmar</option>
+          <option value="draner">Drânër</option>
+        </select>
+
+        <button onclick="attaquePNJ()">Lancer l'attaque</button>
+
+        <div id="resultatPNJ"></div>
+      </div>
+    </div>
+
+
+  <!-- Onglet Chasse -->
+  <div id="tab-chasse" class="tab-content">
+    <div class="card">
+    <h2>Chasse</h2>
+
+    <select id="nomChasseur">
+       <option value="brakmar">Brakmar</option>
+       <option value="draner">Drânër</option>
+    </select>
+
+    <label for="pvActuels">PV actuels :</label>
+    <input type="number" id="pvActuels" value="20" min="1"><br>
+
+
+    <label>Zone :</label>
+    <select id="zoneChasse">
+        <option value="ville">Ville</option>
+        <option value="foret">Forêt</option>
+        <option value="marais">Marais</option>
+        <option value="montagne">Montagne</option>
+        <option value="plaine">Plaine</option>
+    </select>
+
+    <label>Durée (heures) :</label>
+    <input type="number" id="tempsChasse" value="5" min="1" max="12">
+
+    <label>Méthode :</label>
+    <select id="methodeChasse">
+        <option value="brutale">Brutale </option>
+        <option value="discrete">Discrète</option>
+    </select>
+
+    <label for="prioriteChasse">Priorité :</label>
+    <select id="prioriteChasse">
+      <option value="aucune">Aucune</option>
+      <option value="viande">Viande (+1 viande, -1 ressource)</option>
+      <option value="ressource">Ressource (+1 ressource, -1 viande)</option>
+      <option value="compagnon">Compagnon (tente apprivoisement si possible)</option>
+    </select><br>
+
+    <label>Bonus Pistage :</label>
+    <input type="number" id="bonusPistage" value="0">
+
+    <label>Bonus Chasse :</label>
+    <input type="number" id="bonusChasse" value="0">
+
+    <label>Bonus Loot :</label>
+    <input type="number" id="bonusLoot" value="0">
+
+    <button onclick="lancerChasse()">Lancer la chasse</button>
+
+    <div id="resultatChasse" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;">
+    Résultats de la chasse ici...
+    </div>
+  </div>  
+</div>
+
+
+    <!-- Historique partagé -->
+    <h3 id="historicTitle">Historique des lancers</h3>
+    <div id="historique"></div>
+
   </div>
   <script src="script.js"></script>
 </body>
