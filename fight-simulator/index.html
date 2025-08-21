@@ -36,14 +36,8 @@
         <h2>Attaque d'un personnage</h2>
         <label for="personnage">Personnage :</label>
         <select id="personnage">
-          <option value="brakmar" data-for="10" data-agi="3" data-int="5" data-end="8" data-cha="6"
-           data-bonusfor="2" data-bonusagi="0" data-bonusint="1" data-bonusend="1" data-bonuscha="1"
-           data-combatcac="1" data-combatdist="0" data-tacle="2" data-esquive="0"
-           data-niveau="11" data-ca="13" data-reducphy="2" data-reducmag="0" data-pv="25">Brakmar</option>
-          <option value="draner" data-for="5" data-agi="10" data-int="5" data-end="6" data-cha="6"
-           data-bonusfor="1" data-bonusagi="2" data-bonusint="1" data-bonusend="1" data-bonuscha="1"
-           data-combatcac="0" data-combatdist="1" data-tacle="1" data-esquive="2"
-           data-niveau="11" data-ca="10" data-reducphy="1" data-reducmag="0" data-pv="16">Drânër</option>
+          <option value="brakmar">Brakmar</option>
+          <option value="draner">Drânër</option>
         </select>
 
         <label for="bonusContext">Bonus/Malus contextuel :</label>
@@ -91,8 +85,8 @@
         <label for="nomPNJ">Nom du PNJ :</label>
         <input type="text" id="nomPNJ" placeholder="ex : Barbare sanguinaire">
 
-        <label for="typePNJSelect">Type d'attaque :</label>
-        <select id="typePNJSelect">
+        <label for="attackTypePNJSelect">Type d'attaque :</label>
+        <select id="attackTypePNJSelect">
           <option value="cac">Corps à corps</option>
           <option value="distance">À distance</option>
         </select>
@@ -108,8 +102,8 @@
         <label for="degatsPNJ">Dégâts (ex: 2d6+1) :</label>
         <input type="text" id="degatsPNJ" placeholder="2d6+1">
 
-        <label for="typePNJSelect">Type de dégâts</label>
-        <select id="typePNJSelect">
+        <label for="damageTypePNJSelect">Type de dégâts</label>
+        <select id="damageTypePNJSelect">
           <option value="physique">Physique</option>
           <option value="magique">Magique</option>
         </select>

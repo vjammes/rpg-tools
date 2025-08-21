@@ -1,9 +1,37 @@
-// --------------------
-// script.js (version complète à copier/coller)
-// --------------------
+// =====================================================
+// 📦 1) Données globales
+// =====================================================
+const gameData = {
+  personnages: {
+    brakmar: {
+      id: "brakmar",
+      nom: "Brakmar",
+      stats: { for: 10, agi: 3, int: 5, end: 8, cha: 6 },
+      bonus: { for: 2, agi: 0, int: 1, end: 1, cha: 1 },
+      combat: { cac: 1, dist: 0, tacle: 2, esquive: 0 },
+      niveau: 11,
+      ca: 13,
+      reduc: { phy: 2, mag: 0 },
+      pv: 25,
+    },
+    draner: {
+      id: "draner",
+      nom: "Drânër",
+      stats: { for: 5, agi: 10, int: 5, end: 6, cha: 6 },
+      bonus: { for: 1, agi: 2, int: 1, end: 1, cha: 1 },
+      combat: { cac: 0, dist: 1, tacle: 1, esquive: 2 },
+      niveau: 11,
+      ca: 10,
+      reduc: { phy: 1, mag: 0 },
+      pv: 16,
+    },
+  },
+};
 
+// ============================================
+// 🔗 2) Raccourcis DOM
+// ============================================
 const persoSelect = document.getElementById('personnage');
-const persoNom = persoSelect.options[persoSelect.selectedIndex].text;
 const statsDiv = document.getElementById('statsPerso');
 const armeSelect = document.getElementById('arme');
 const historiqueDiv = document.getElementById('historique');
@@ -14,60 +42,46 @@ const resumeDiv = document.getElementById('resume');
 
 let historique = [];
 
+// =====================================================
+// 🧾 3) Affichage des stats
+// =====================================================
 function afficherStats() {
-  const opt = persoSelect.options[persoSelect.selectedIndex];
-  const persoNom = opt.text;
-  const forVal = opt.dataset.for;
-  const agilVal = opt.dataset.agi;
-  const intVal = opt.dataset.int;
-  const endVal = opt.dataset.end;
-  const chaVal = opt.dataset.cha;
-  const niveau = opt.dataset.niveau;
-  const ca = opt.dataset.ca;
-  const reducphy = parseInt(opt.dataset.reducphy);
-  const reducmag = parseInt(opt.dataset.reducmag);
-  const pvMax = parseInt(opt.dataset.pv);
-  const bonusFor = parseInt(opt.dataset.bonusfor);
-  const bonusAgi = parseInt(opt.dataset.bonusagi);
-  const bonusInt = parseInt(opt.dataset.bonusint);
-  const bonusEnd = parseInt(opt.dataset.bonusend);
-  const bonusCha = parseInt(opt.dataset.bonuscha);
-  const combatCac = parseInt(opt.dataset.combatcac);
-  const combatDist = parseInt(opt.dataset.combatdist);
-  const tacle = parseInt(opt.dataset.tacle);
-  const esquive = parseInt(opt.dataset.esquive);
-  const chasse = parseInt(opt.dataset.esquive);
-  const pistage = parseInt(opt.dataset.esquive);
-  const apprivoisement = parseInt(opt.dataset.esquive);
+  const id = persoSelect.value;
+  const perso = gameData.personnages[id];
+  if (!perso) {
+    statsDiv.textContent = "Sélectionnez un personnage";
+    return;
+  }
 
+  const { stats, bonus, combat, niveau, ca, reduc, pv } = perso;
 
   statsDiv.innerHTML = `
-    <h3 id="statsTitle">Stats de ${persoNom}</h3>
+    <h3 id="statsTitle">Stats de ${perso.nom}</h3>
       <div class="table-wrapper">
         <table>
           <tr><th>Caractéristiques</th><th>Stats</th><th>Bonus tests</th></tr>
-          <tr><td>FOR</td><td>${forVal}</td><td>${bonusFor}</td></tr>
-          <tr><td>AGI</td><td>${agilVal}</td><td>${bonusAgi}</td></tr>
-          <tr><td>INT</td><td>${intVal}</td><td>${bonusInt}</td></tr>
-          <tr><td>END</td><td>${endVal}</td><td>${bonusEnd}</td></tr>
-          <tr><td>CHA</td><td>${chaVal}</td><td>${bonusCha}</td></tr>
+          <tr><td>FOR</td><td>${stats.for}</td><td>${bonus.for}</td></tr>
+          <tr><td>AGI</td><td>${stats.agi}</td><td>${bonus.agi}</td></tr>
+          <tr><td>INT</td><td>${stats.int}</td><td>${bonus.int}</td></tr>
+          <tr><td>END</td><td>${stats.end}</td><td>${bonus.end}</td></tr>
+          <tr><td>CHA</td><td>${stats.cha}</td><td>${bonus.cha}</td></tr>
         </table>
       </div>
       <div class="table-wrapper">
         <table>
           <tr><th>Combat</th><th>Corps à Corps</th><th>À Distance</th></tr>
-          <tr><td></td><td>${combatCac}</td><td>${combatDist}</td></tr>
+          <tr><td></td><td>${combat.cac}</td><td>${combat.dist}</td></tr>
           <tr><th>Contact</th><th>Tacle</th><th>Esquive</th></tr>
-          <tr><td></td><td>${tacle}</td><td>${esquive}</td></tr>
+          <tr><td></td><td>${combat.tacle}</td><td>${combat.esquive}</td></tr>
         </table>
       </div>
       <div class="table-wrapper">
         <table>
           <tr><th>Niveau</th><td>${niveau}</td></tr>
           <tr><th>Classe d'armure</th><td>${ca}</td></tr>
-          <tr><th>Réduction des dégâts physiques</th><td>${reducphy}</td></tr>
-          <tr><th>Réduction des dégâts magiques</th><td>${reducmag}</td></tr>
-          <tr><th>PV max</th><td>${pvMax}</td></tr>
+          <tr><th>Réduction des dégâts physiques</th><td>${reduc.phy}</td></tr>
+          <tr><th>Réduction des dégâts magiques</th><td>${reduc.mag}</td></tr>
+          <tr><th>PV max</th><td>${pv}</td></tr>
         </table>
       </div>
     `;
@@ -75,6 +89,9 @@ function afficherStats() {
 persoSelect.addEventListener('change', afficherStats);
 afficherStats();
 
+// =====================================================
+// 🎲 4) Utilitaires de dés (identiques à l’existant)
+// =====================================================
 function rollDice(expr) {
   // Exemple d'expr : "2d10+4" ou "1d6-2"
   const regex = /^(\d+)d(\d+)([+-]\d+)?$/i;
@@ -82,9 +99,9 @@ function rollDice(expr) {
   if (!match) {
     throw new Error("Expression de dé invalide : " + expr);
   }
-  const count = parseInt(match[1]);
-  const sides = parseInt(match[2]);
-  const bonus = match[3] ? parseInt(match[3]) : 0;
+  const count = parseInt(match[1], 10);
+  const sides = parseInt(match[2], 10);
+  const bonus = match[3] ? parseInt(match[3], 10) : 0;
 
   let rolls = [];
   for (let i = 0; i < count; i++) {
@@ -99,17 +116,17 @@ function rollDice(expr) {
   return { total, rolls, bonus };
 }
 
+// =====================================================
+// ⚔️ 5) Lancer d’un personnage 
+//     - CàC : d20 + bonus ; 1 = échec critique ; 20 = critique (dégâts doublés)
+//     - Distance : d6 pour toucher, dégâts = formule + bonusDist + contexte
+//     - Tests : d20 + bonus de la carac
+//     - Parsing dégâts "XdY+Z" inchangé
+// =====================================================
 function lancerDe() {
-  const optPerso = persoSelect.options[persoSelect.selectedIndex];
-  const perso = {
-    bonusFor: parseInt(optPerso.dataset.bonusfor),
-    bonusAgi: parseInt(optPerso.dataset.bonusagi),
-    bonusInt: parseInt(optPerso.dataset.bonusint),
-    bonusEnd: parseInt(optPerso.dataset.bonusend),
-    bonusCha: parseInt(optPerso.dataset.bonuscha),
-    combatCac: parseInt(optPerso.dataset.combatcac),
-    combatDist: parseInt(optPerso.dataset.combatdist),
-  };
+  const id = persoSelect.value;
+  const perso = gameData.personnages[id];
+  const persoNom = perso.nom;
 
   const bonusContext = parseInt(bonusContextInput.value) || 0;
   const seuil = parseInt(seuilInput.value) || 10;
@@ -128,16 +145,14 @@ function lancerDe() {
   let degats = 0;
 
   if (armeType === "cac") {
-
-    // const jetToucherObj = { total: 20, rolls: [20] }; // Simule un vrai jet de 20
-    // jetToucher = 20; // Valeur à simuler
-
+    // d20 au CàC + gestion critiques
     const jetToucherObj = rollDice("1d20");
     jetToucher = jetToucherObj.total;
 
     if (jetToucher === 1) echecCritique = true;
     if (jetToucher === 20) successCritique = true;
 
+    // ⚠️ On suit ta version : pas de bonusTest ici (tu l’avais à 0)
     const bonusTest = 0;
     const totalToucher = jetToucher + bonusTest + bonusContext;
     touche = totalToucher >= seuil;
@@ -149,20 +164,14 @@ function lancerDe() {
     resumeTexte += touche ? "=> Touché\n" : "=> Raté\n";
 
     // Séparation dés et bonus fixe dans l'arme (ex: "2d10+4")
-    // Nettoyage de la chaîne armeValeur
     const armeValeurClean = armeValeur.replace(/\s+/g, "");
-    console.log("armeValeurClean =", armeValeurClean);
-
     const match = armeValeurClean.match(/^(\d+d\d+)([+-]\d+)?$/);
-
     let formuleDes = armeValeurClean;
     let bonusArmeFixe = 0;
-
     if (match) {
       formuleDes = match[1]; // ex: "2d10"
-      bonusArmeFixe = parseInt(match[2] || "0"); // ex: "+4"
+      bonusArmeFixe = parseInt(match[2] || "0", 10); // ex: "+4"
     }
-
 
     if (!touche) {
       if (echecCritique) {
@@ -178,7 +187,7 @@ function lancerDe() {
       if (successCritique) {
         const baseDegats = degatsRollObj.total + bonusArmeFixe;
         const degatsJetDouble = baseDegats * 2;
-        degats = degatsJetDouble + perso.combatCac + bonusContext;
+        degats = degatsJetDouble + perso.combat.cac + bonusContext;
         if (degats < 1) degats = 1;
 
         let degatsParts = [`( ${degatsRollObj.rolls.join(' + ')} )`];
@@ -188,33 +197,30 @@ function lancerDe() {
         resumeTexte += `💥 Dégâts critiques : (${baseDegatsTexte}) × 2 = ${degatsJetDouble}`;
 
         let bonusParts = [];
-        if (perso.combatCac !== 0) bonusParts.push(`+ CàC (${perso.combatCac})`);
+        if (perso.combat.cac !== 0) bonusParts.push(`+ CàC (${perso.combat.cac})`);
         if (bonusContext !== 0) bonusParts.push(`+ Contexte (${bonusContext})`);
         resumeTexte += ` ${bonusParts.join(' ')} = ${degats}\n`;
 
         resultatTexte = `🎯 Coup critique ! → Dégâts doublés : ${degats}`;
       } else {
-
-        const degatsRollObj = rollDice(formuleDes);  
-
-        // Calcule total dégâts en ajoutant bonus fixe + bonus combat + contexte
-        degats = degatsRollObj.total + bonusArmeFixe + perso.combatCac + bonusContext;
-
+        // Normal hit
+        const degatsRollObj2 = rollDice(formuleDes);
+        degats = degatsRollObj2.total + bonusArmeFixe + perso.combat.cac + bonusContext;
         if (degats < 1) degats = 1;
 
         let degatsParts = [];
-        if (degatsRollObj.rolls.length > 0) degatsParts.push(`( ${degatsRollObj.rolls.join(' + ')} )`);
+        if (degatsRollObj2.rolls.length > 0) degatsParts.push(`( ${degatsRollObj2.rolls.join(' + ')} )`);
         if (bonusArmeFixe !== 0) degatsParts.push(`+ ${bonusArmeFixe}`);
-        if (perso.combatCac !== 0) degatsParts.push(`+ CàC (${perso.combatCac})`);
+        if (perso.combat.cac !== 0) degatsParts.push(`+ CàC (${perso.combat.cac})`);
         if (bonusContext !== 0) degatsParts.push(`+ Contexte (${bonusContext})`);
 
         resumeTexte += `Dégâts : ${degatsParts.join(' ')} = ${degats}\n`;
         resultatTexte = `Touché ! (${jetToucher}) → Dégâts infligés : ${degats}`;
       }
-
     }
 
   } else if (armeType === "distance") {
+    // À distance : ton code d’origine → jet 1d6 vs seuil (CT gérée côté PNJ)
     const jetToucherObj = rollDice("1d6");
     jetToucher = jetToucherObj.total;
     touche = jetToucher >= seuil;
@@ -224,27 +230,29 @@ function lancerDe() {
       resultatTexte = "Résultat : Échec.";
     } else {
       const degatsRollObj = rollDice(armeValeur);
-      degats = degatsRollObj.total + perso.combatDist + bonusContext;
+      degats = degatsRollObj.total + perso.combat.dist + bonusContext;
       if (degats < 1) degats = 1;
 
       let degatsParts = [];
       if (degatsRollObj.rolls.length > 0) degatsParts.push(degatsRollObj.rolls.join(' + '));
-      if (perso.combatDist !== 0) degatsParts.push(`bonus distance (${perso.combatDist})`);
+      if (perso.combat.dist !== 0) degatsParts.push(`bonus distance (${perso.combat.dist})`);
       if (bonusContext !== 0) degatsParts.push(`bonus contexte (${bonusContext})`);
       resumeTexte += `Dégâts (jets + bonus) : ${degatsParts.join(' + ')} = ${degats}\n`;
 
       resultatTexte = `Touché ! (${jetToucher}) Dégâts infligés : ${degats}`;
     }
+
   } else if (armeType === "test") {
+    // Test de carac : 1d20 + bonus de la carac + contexte
     const jetToucherObj = rollDice("1d20");
     jetToucher = jetToucherObj.total;
     let bonusTest = 0;
     switch (armeOpt.dataset.stat) {
-      case "for": bonusTest = perso.bonusFor; break;
-      case "agi": bonusTest = perso.bonusAgi; break;
-      case "int": bonusTest = perso.bonusInt; break;
-      case "end": bonusTest = perso.bonusEnd; break;
-      case "cha": bonusTest = perso.bonusCha; break;
+      case "for": bonusTest = perso.bonus.for; break;
+      case "agi": bonusTest = perso.bonus.agi; break;
+      case "int": bonusTest = perso.bonus.int; break;
+      case "end": bonusTest = perso.bonus.end; break;
+      case "cha": bonusTest = perso.bonus.cha; break;
     }
     const totalTest = jetToucher + bonusTest + bonusContext;
     if (jetToucher === 1) echecCritique = true;
@@ -279,6 +287,11 @@ function lancerDe() {
   resumeDiv.textContent = resumeTexte;
 }
 
+// =====================================================
+// 👹 6) Attaque PNJ
+//     - CàC : d20 (1 = échec crit, 20 = crit dégâts ×2)
+//     - Distance : d6 vs CT (1 = échec)
+// =====================================================
 function attaquePNJ() {
   try {
     const nomEl = document.getElementById("nomPNJ");
@@ -286,18 +299,19 @@ function attaquePNJ() {
     const attaqueEl = document.getElementById("attaquePNJ");
     const degatsEl = document.getElementById("degatsPNJ");
     const cibleSel = document.getElementById("ciblePNJ");
-    const type = document.getElementById('typePNJSelect').value;
+
+    const type = document.getElementById('attackTypePNJSelect').value;
 
     const nom = nomEl ? (nomEl.value.trim() || "PNJ") : "PNJ";
-    const ct = ctEl ? (parseInt(ctEl.value) || 0) : 0;
+    const ct = ctEl ? (parseInt(ctEl.value, 10) || 0) : 0;
     const attaqueNom = attaqueEl ? (attaqueEl.value.trim() || "Attaque") : "Attaque";
     const degatsExpr = degatsEl ? (degatsEl.value.trim() || "1d6") : "1d6";
-    const cibleValue = cibleSel ? (cibleSel.value) : null;
+    const cibleId = cibleSel ? (cibleSel.value) : null;
+    const cible = cibleId ? gameData.personnages[cibleId] : null;
 
-    const optCible = cibleValue ? document.querySelector(`#personnage option[value="${cibleValue}"]`) : null;
-    const cibleLabel = optCible ? optCible.textContent : (cibleValue || "Cible");
-    const caCible = optCible ? parseInt(optCible.dataset.ca) : 0;
-    const reducPhy = optCible ? parseInt(optCible.dataset.reducphy) : 0; 
+    const cibleLabel = cible ? cible.nom : (cibleId || "Cible");
+    const caCible = cible ? cible.ca : 0;
+    const reducPhy = cible ? cible.reduc.phy : 0;
 
     let jetToucher = 0;
     let touche = false;
@@ -310,6 +324,7 @@ function attaquePNJ() {
     if (type === "cac") {
       const jet = rollDice("1d20");
       jetToucher = jet.total;
+
       if (jetToucher === 1) {
         echecCrit = true;
         resultatText = `💥 Échec critique : ${nom} passe son prochain tour !`;
@@ -319,44 +334,47 @@ function attaquePNJ() {
         resumeText += `Jet pour toucher (1d20) : ${jetToucher} = ${jetToucher}\n`;
         resumeText += touche ? "=> Touché\n" : "=> Raté\n";
 
-
         if (touche) {
-          // Parse degatsExpr pour séparer dés et bonus fixe (ex: "2d6+1")
+          // Parse dégâts "XdY+Z"
           const exprClean = degatsExpr.replace(/\s+/g, "");
           const m = exprClean.match(/^(\d+d\d+)([+-]\d+)?$/);
           let formule = exprClean;
           let bonusFixe = 0;
           if (m) {
             formule = m[1];
-            bonusFixe = parseInt(m[2] || "0");
+            bonusFixe = parseInt(m[2] || "0", 10);
           }
           const rollD = rollDice(formule);
-          const baseDeg = rollD.total + bonusFixe;
-          if (succesCrit) degats = baseDeg * 2;
-          else degats = baseDeg;
+          const baseDeg = rollD.total + bonusFixe - reducPhy;
+          const basePos = baseDeg < 1 ? 1 : baseDeg;
 
           if (succesCrit) {
-            resumeText += `💥 Dégâts critiques : ( ${rollD.rolls.join(" + ")} )${bonusFixe !== 0 ? ` + ${bonusFixe}` : ""} × 2 = ${degats}\n`;
-            resultatText = `🎯 Coup critique de ${nom} ! (20) → Dégâts doublés : ${cibleLabel} reçoit ${degats} dégâts`;
+            degats = basePos * 2;
+            resumeText += `💥 Dégâts critiques : ( ${rollD.rolls.join(" + ")} )${bonusFixe !== 0 ? ` + ${bonusFixe}` : ""} - Réduc (${reducPhy}) × 2 = ${degats}\n`;
+            resultatText = `🎯 Coup critique de ${nom} ! (20) → ${cibleLabel} reçoit ${degats} dégâts`;
           } else {
-            resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} )${bonusFixe !== 0 ? ` + ${bonusFixe}` : ""} = ${degats}\n`;
+            degats = basePos;
+            resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} )${bonusFixe !== 0 ? ` + ${bonusFixe}` : ""} - Réduc (${reducPhy}) = ${degats}\n`;
             resultatText = `${nom} touche ${cibleLabel} ! (${jetToucher}) et lui inflige : ${degats} dégât(s).`;
           }
-          } else {
-            resumeText += `Jet pour toucher (1d20) : ${jetToucher} vs CA (${caCible}) => Raté\n`;
-            resultatText = `${nom} rate son attaque (${jetToucher}).`;
-          }
+        } else {
+          resumeText += `Jet pour toucher (1d20) : ${jetToucher} vs CA (${caCible}) => Raté\n`;
+          resultatText = `${nom} rate son attaque (${jetToucher}).`;
+        }
       }
+
     } else if (type === "distance") {
+      // Règle existante : 1d6, 1 = échec, sinon réussite si >= CT
       const jet = rollDice("1d6");
       jetToucher = jet.total;
-      touche = touche = (jetToucher > 1) && (jetToucher >= ct); // règle : si jet < CT -> échec et 1 = échec
+      touche = (jetToucher > 1) && (jetToucher >= ct);
       resumeText += `Jet pour toucher (1d6) : ${jetToucher} = ${jetToucher}\n`;
       resumeText += touche ? "=> Touché\n" : "=> Raté\n";
       if (touche) {
         const rollD = rollDice(degatsExpr);
-        degats = rollD.total;
-        resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${degats}\n`;
+        degats = rollD.total - reducPhy;
+        if (degats < 1) degats = 1;
+        resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} ) - Réduc (${reducPhy}) = ${degats}\n`;
         resultatText = `${nom} → ${cibleLabel} Touché ! (${jetToucher}) → Dégât(s) infligé(s) : ${degats}`;
       } else {
         resumeText += `Jet pour toucher (1d6) : ${jetToucher} vs CT (${ct}) => Raté\n`;
@@ -371,16 +389,14 @@ function attaquePNJ() {
     if (touche) {
       historique.unshift(`[${date}] ${attaqueNom} (${nom} → ${cibleLabel}) => Touché ! (${jetToucher}) Dégâts infligés : ${degats}`);
     } else {
-      // On garde le jet pour cohérence avec Personnage
       const tag = (echecCrit ? "Échec critique" : "Échec");
       historique.unshift(`[${date}] ${attaqueNom} (${nom} → ${cibleLabel}) => ${tag} (${jetToucher})`);
     }
     if (historique.length > 10) historique.pop();
     historiqueDiv.textContent = historique.join('\n');
 
-    // Affiche résultat PNJ (élément dans ton HTML : #resultatPNJ)
     const out = document.getElementById('resultatPNJ');
-    if (out) out.textContent = resultatText;
+    if (out) out.textContent = resultatText + (resumeText ? ("\n" + resumeText) : "");
 
   } catch (err) {
     console.error("Erreur dans attaquePNJ :", err);
@@ -389,18 +405,18 @@ function attaquePNJ() {
   }
 }
 
-/* -------------------------
-   📜 Données de chasse
-------------------------- */
+// =====================================================
+// 🐾 7) Données Chasse 
+// =====================================================
 const chasseData = {
   ville: [
     {min:6,max:9,animal:"un lapin",jets:{FOR:12,AGI:8,CHA:null},loot:[{t:"ration(s) de viande",q:"0-1"},{t:"fourrure de Lapin",q:"0-1"}],degats:"0"},
-    {min:10,max:11,animal:"un faisan",jets:{FOR:12,AGI:10,CHA:null},loot:[{t:"ration(s) de viande",q:"0-1"},{t:"plume(s) de Faisan",q:"0-4"}],degats:"0"},
+    {min:10,max:11,animal:"un faisan",jets:{FOR:14,AGI:10,CHA:null},loot:[{t:"ration(s) de viande",q:"0-1"},{t:"plume(s) de Faisan",q:"0-4"}],degats:"0"},
     {min:12,max:16,animal:"un sanglier",jets:{FOR:12,AGI:14,CHA:null},loot:[{t:"ration(s) de viande",q:"1-3"},{t:"cuir(s) de Sanglier",q:"1d3"}],degats:"1d6"},
     {min:17,max:200,animal:"un chien errant",jets:{FOR:12,AGI:12,CHA:14},loot:[{t:"ration(s) de viande",q:"1-2"}],degats:"1d6"}
   ],
   foret: [
-    {min:9,max:10,animal:"un renard",jets:{FOR:12,AGI:10,CHA:12},loot:[{t:"ration(s) de viande",q:"2d1"},{t:"fourrure de Renard",q:"0-1"}],degats:"1"},
+    {min:9,max:10,animal:"un renard",jets:{FOR:13,AGI:10,CHA:12},loot:[{t:"ration(s) de viande",q:"2d1"},{t:"fourrure de Renard",q:"0-1"}],degats:"1"},
     {min:11,max:13,animal:"une biche",jets:{FOR:14,AGI:13,CHA:null},loot:[{t:"ration(s) de viande",q:"2-3"}],degats:"1d4"},
     {min:15,max:17,animal:"un loup",jets:{FOR:12,AGI:13,CHA:14},loot:[{t:"ration(s) de viande",q:"2d1"},{t:"croc(s) de Loup",q:"0-2"}],degats:"1d6"},
     {min:18,max:200,animal:"un ours",jets:{FOR:14,AGI:16,CHA:null},loot:[{t:"ration(s) de viande",q:"2-5"},{t:"fourrure(s) épaisse d’Ours",q:"0-1"}],degats:"2d6"}
@@ -408,7 +424,7 @@ const chasseData = {
   marais: [
     {min:5,max:9,animal:"une grenouille",jets:{FOR:10,AGI:6,CHA:null},loot:[{t:"ration(s) de viande",q:"1d1"}],degats:"0"},
     {min:10,max:14,animal:"un serpent",jets:{FOR:10,AGI:8,CHA:12},loot:[{t:"ration(s) de viande",q:"1d1"},{t:"peau de serpent",de:"0-1"},{t:"venin(s) puissant",q:"1d1"}],degats:"1d4"},
-    {min:15,max:17,animal:"une tortue géante",jets:{FOR:12,AGI:14,CHA:null},loot:[{t:"ration(s) de viande",q:"2d1"},{t:"carapace de Tortue géante",q:"0-1"}],degats:"1d4"},
+    {min:15,max:17,animal:"une tortue géante",jets:{FOR:11,AGI:14,CHA:null},loot:[{t:"ration(s) de viande",q:"2d1"},{t:"carapace de Tortue géante",q:"0-1"}],degats:"1d4"},
     {min:18,max:200,animal:"un crocodile",jets:{FOR:14,AGI:15,CHA:null},loot:[{t:"ration(s) de viande",q:"2-5"},{t:"cuir(s) renforcé(s) de Crocodile",q:"1d3"}],degats:"2d6"}
   ],
   montagne: [
@@ -425,9 +441,9 @@ const chasseData = {
   ]
 };
 
-/* -------------------------
-   🎲 Utilitaires de dés
-------------------------- */
+// =====================================================
+// 🎲 8) Utilitaires chasse
+// =====================================================
 function lancerDes(faces) {
   return Math.floor(Math.random() * faces) + 1;
 }
@@ -440,8 +456,8 @@ function evalDegats(expr) {
   if (match) {
     const [, n, faces] = match;
     let total = 0;
-    for (let i = 0; i < parseInt(n); i++) {
-      total += lancerDes(parseInt(faces));
+    for (let i = 0; i < parseInt(n, 10); i++) {
+      total += lancerDes(parseInt(faces, 10));
     }
     return total;
   }
@@ -450,34 +466,33 @@ function evalDegats(expr) {
   match = expr.match(/(\d+)-(\d+)/);
   if (match) {
     const [, min, max] = match;
-    return Math.floor(Math.random() * (parseInt(max) - parseInt(min) + 1)) + parseInt(min);
+    return Math.floor(Math.random() * (parseInt(max, 10) - parseInt(min, 10) + 1)) + parseInt(min, 10);
   }
 
-  return parseInt(expr) || 0;
+  return parseInt(expr, 10) || 0;
 }
 
-
-/* -------------------------
-   🔍 Trouver un animal
-------------------------- */
 function trouverAnimal(zone, jetPistage) {
   const animaux = chasseData[zone] || [];
   return animaux.find(a => jetPistage >= a.min && jetPistage <= a.max) || null;
 }
 
-/* -------------------------
-   🎯 Lancer la chasse
-------------------------- */
+// =====================================================
+// 🏹 9) Lancer la chasse
+// =====================================================
 function lancerChasse() {
   const nameSelect = document.getElementById('nomChasseur');
-  const nomChasseur = persoSelect.options[nameSelect.selectedIndex].text;
+  const chasseurId = nameSelect.value;
+  const chasseur = gameData.personnages[chasseurId];
+  const nomChasseur = chasseur ? chasseur.nom : chasseurId;
+
   const zone = document.getElementById("zoneChasse").value;
-  const duree = parseInt(document.getElementById("tempsChasse").value);
+  const duree = parseInt(document.getElementById("tempsChasse").value, 10);
   const methode = document.getElementById("methodeChasse").value;
   const priorite = document.getElementById("prioriteChasse").value;
-  const bonusPistage = parseInt(document.getElementById("bonusPistage").value) || 0;
-  const bonusChasse = parseInt(document.getElementById("bonusChasse").value) || 0;
-  let pvActuels = parseInt(document.getElementById("pvActuels").value) || 10;
+  const bonusPistage = parseInt(document.getElementById("bonusPistage").value, 10) || 0;
+  const bonusChasse = parseInt(document.getElementById("bonusChasse").value, 10) || 0;
+  let pvActuels = parseInt(document.getElementById("pvActuels").value, 10) || (chasseur ? chasseur.pv : 10);
 
   let pvPerdus = 0;
   let butin = [];
@@ -493,12 +508,12 @@ function lancerChasse() {
       cible = trouverAnimal(zone, jetPistage);
 
       if (!cible) {
-        log.push(`- **Heure ${h}** : Jet de pistage ${jetPistage} → Rien trouvé.`);
+        log.push(`- *Heure ${h}* : Jet de pistage ${jetPistage} → Rien trouvé.`);
         continue;
       }
-      log.push(`- **Heure ${h}** : Jet de pistage ${jetPistage} → ${nomChasseur} rencontre **${cible.animal}** !`);
+      log.push(`- *Heure ${h}* : Jet de pistage ${jetPistage} → ${nomChasseur} rencontre *${cible.animal}* !`);
     } else {
-      log.push(`- **Heure ${h}** : ${nomChasseur} continue le combat contre **${cible.animal}**.`);
+      log.push(`- *Heure ${h}* : ${nomChasseur} continue le combat contre *${cible.animal}*.`);
     }
 
     const jetAction = lancerDes(20) + bonusChasse;
@@ -525,7 +540,7 @@ function lancerChasse() {
           if (quantite > 0) lootTrouve.push(`${quantite} ${obj.t}`);
         });
         butin.push(...lootTrouve);
-        log.push(`    - Jet ${jetAction} (≥ ${seuil}) → Succès ! ${cible.animal} est vaincu et rapporte **${lootTrouve.join(", ")}**.`);
+        log.push(`    - Jet ${jetAction} (≥ ${seuil}) → Succès ! ${cible.animal} est vaincu et rapporte *${lootTrouve.join(", ")}*.`);
         cible = null;
       } else {
         const dmg = evalDegats(cible.degats);
@@ -549,7 +564,7 @@ function lancerChasse() {
   butin.forEach(item => {
     const match = item.match(/(\d+)\s+(.+)/);
     if (match) {
-      const quantite = parseInt(match[1]);
+      const quantite = parseInt(match[1], 10);
       const type = match[2];
       if (!lootCompteur[type]) lootCompteur[type] = 0;
       lootCompteur[type] += quantite;
@@ -567,31 +582,28 @@ function lancerChasse() {
     `Butin : ${butinRegroupe.join(", ") || "Aucun"}<br>` +
     `Compagnons : ${compagnons.join(", ") || "Aucun"}`;
 
-// Historique (max 10)
-const historiqueDiv = document.getElementById("historique"); 
-if (!window.historiqueChasses) window.historiqueChasses = []; 
+  // Historique (max 10)
+  const historiqueDivLocal = document.getElementById("historique"); 
+  if (!window.historiqueChasses) window.historiqueChasses = []; 
 
-const date = new Date().toLocaleTimeString();
-const texteBilan = `[${date}] ${nomChasseur} : PV ${pvActuels}, PV perdus ${pvPerdus}, Butin : ${butinRegroupe.join(", ") || "Aucun"}, Compagnons : ${compagnons.join(", ") || "Aucun"}`;
+  const date = new Date().toLocaleTimeString();
+  const texteBilan = `[${date}] ${nomChasseur} : PV ${pvActuels}, PV perdus ${pvPerdus}, Butin : ${butinRegroupe.join(", ") || "Aucun"}, Compagnons : ${compagnons.join(", ") || "Aucun"}`;
 
-window.historiqueChasses.unshift(texteBilan);
-if (window.historiqueChasses.length > 10) window.historiqueChasses.pop();
+  window.historiqueChasses.unshift(texteBilan);
+  if (window.historiqueChasses.length > 10) window.historiqueChasses.pop();
 
-historiqueDiv.textContent = window.historiqueChasses.join("\n---\n");
-
-
+  historiqueDivLocal.textContent = window.historiqueChasses.join("\n---\n");
 }
 
-
-
-
-// ===================
-// Initialisations DOMContentLoaded (regroupe updateTestLabels, onglets, menu toggle)
-// ===================
+// =====================================================
+// 🧭 10) Initialisations DOMContentLoaded
+//      (updateTestLabels, menu, onglets, CT distance…)
+// =====================================================
 document.addEventListener("DOMContentLoaded", function () {
   // === updateTestLabels ===
   function updateTestLabels() {
-    const selectedPersonnage = persoSelect.options[persoSelect.selectedIndex];
+    const idPerso = persoSelect.value;
+    const perso = gameData.personnages[idPerso];
 
     const statLabels = {
       for: "Force",
@@ -602,12 +614,9 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     for (const option of armeSelect.querySelectorAll("option[data-type='test']")) {
-      const stat = option.dataset.stat;
-      const bonusKey = "bonus" + stat;
-      const bonus = selectedPersonnage.dataset[bonusKey];
-      const baseStat = selectedPersonnage.dataset[stat];
+      const stat = option.dataset.stat; // "for", "agi", ...
+      const bonus = perso ? perso.bonus[stat] : 0;
       const baseLabel = statLabels[stat] || stat;
-
       option.textContent = `${baseLabel} (+${bonus})`;
     }
   }
@@ -615,90 +624,86 @@ document.addEventListener("DOMContentLoaded", function () {
   persoSelect.addEventListener("change", updateTestLabels);
   updateTestLabels();
 
- // === MENU TOGGLE + OVERLAY ===
-const menuToggle = document.getElementById("menuToggle");
-const sidebar = document.querySelector(".sidebar");
-const overlay = document.querySelector(".overlay");
-const closeSidebar = document.querySelector(".close-sidebar");
+  // === MENU TOGGLE + OVERLAY ===
+  const menuToggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.querySelector(".overlay");
+  const closeSidebar = document.querySelector(".close-sidebar");
 
-function toggleSidebar() {
-  sidebar.classList.toggle("open");
-  if (overlay) overlay.classList.toggle("show");
-}
+  function toggleSidebar() {
+    sidebar.classList.toggle("open");
+    if (overlay) overlay.classList.toggle("show");
+  }
 
-if (menuToggle && sidebar) {
-  menuToggle.addEventListener("click", toggleSidebar);
-}
+  if (menuToggle && sidebar) {
+    menuToggle.addEventListener("click", toggleSidebar);
+  }
 
-if (closeSidebar) {
-  closeSidebar.addEventListener("click", toggleSidebar);
-}
+  if (closeSidebar) {
+    closeSidebar.addEventListener("click", toggleSidebar);
+  }
 
-if (overlay) {
-  overlay.addEventListener("click", toggleSidebar);
-}
+  if (overlay) {
+    overlay.addEventListener("click", toggleSidebar);
+  }
 
+  // === GESTION AFFICHAGE CT SI ATTAQUE À DISTANCE ===
+  const attackTypePNJSelect = document.getElementById('attackTypePNJSelect');
+  const ctPNJContainer = document.getElementById('ctPNJContainer');
 
-// === GESTION AFFICHAGE CT SI ATTAQUE À DISTANCE ===
-const typePNJSelect = document.getElementById('typePNJSelect');
-const ctPNJContainer = document.getElementById('ctPNJContainer');
-
-if (typePNJSelect && ctPNJContainer) {
-  typePNJSelect.addEventListener('change', () => {
-    if (typePNJSelect.value === 'distance') {
-      ctPNJContainer.style.display = 'block';
-    } else {
-      ctPNJContainer.style.display = 'none';
-    }
-  });
-}
-
-// === GESTION DES ONGLETS ===
-const tabButtons = document.querySelectorAll('.tab-button');
-const tabContents = document.querySelectorAll('.tab-content');
-
-if (tabButtons.length && tabContents.length) {
-  tabButtons.forEach(button => {
-    button.addEventListener('click', function () {
-      // Retire "active" sur tous les boutons
-      tabButtons.forEach(b => b.classList.remove('active'));
-      // Cache tous les contenus
-      tabContents.forEach(c => {
-        c.classList.remove('active');
-        c.style.display = 'none';
-      });
-
-      // Active le bouton cliqué
-      this.classList.add('active');
-
-      // Affiche le contenu correspondant
-      const targetId = 'tab-' + this.dataset.tab;
-      const target = document.getElementById(targetId);
-      if (target) {
-        target.classList.add('active');
-        target.style.display = '';
+  if (attackTypePNJSelect && ctPNJContainer) {
+    attackTypePNJSelect.addEventListener('change', () => {
+      if (attackTypePNJSelect.value === 'distance') {
+        ctPNJContainer.style.display = 'block';
+      } else {
+        ctPNJContainer.style.display = 'none';
       }
     });
-  });
+  }
 
-  // S'assure que le contenu initial reste visible
-  const initial = document.querySelector('.tab-content.active');
-  if (initial) initial.style.display = '';
-}
-  });
+  // === GESTION DES ONGLETS ===
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const tabContents = document.querySelectorAll('.tab-content');
 
+  if (tabButtons.length && tabContents.length) {
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function () {
+        // Retire "active" sur tous les boutons
+        tabButtons.forEach(b => b.classList.remove('active'));
+        // Cache tous les contenus
+        tabContents.forEach(c => {
+          c.classList.remove('active');
+          c.style.display = 'none';
+        });
+
+        // Active le bouton cliqué
+        this.classList.add('active');
+
+        // Affiche le contenu correspondant
+        const targetId = 'tab-' + this.dataset.tab;
+        const target = document.getElementById(targetId);
+        if (target) {
+          target.classList.add('active');
+          target.style.display = '';
+        }
+      });
+    });
+
+    // S'assure que le contenu initial reste visible
+    const initial = document.querySelector('.tab-content.active');
+    if (initial) initial.style.display = '';
+  }
+});
+
+// (Duplicata d’onglets
 const tabs = document.querySelectorAll('.tab-button');
 const contents = document.querySelectorAll('.tab-content');
 
 tabs.forEach((tab, idx) => {
   tab.addEventListener('click', () => {
-    // Reset tous les tabs et contenus
     tabs.forEach(t => t.classList.remove('active'));
     contents.forEach(c => c.classList.remove('active'));
-
-    // Activer le tab cliqué
     tab.classList.add('active');
     contents[idx].classList.add('active');
   });
 });
-
