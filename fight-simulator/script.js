@@ -231,7 +231,7 @@ function lancerDe() {
       if (successCritique) {
         const baseDegats = degatsRollObj.total + bonusArmeFixe;
         const degatsJetDouble = baseDegats * 2;
-        degats = degatsJetDouble + perso.combat.cac + bonusContext;
+        degats = degatsJetDouble + perso.bonusDegatsCAC + bonusContext;
         if (degats < 1) degats = 1;
 
         let degatsParts = [`( ${degatsRollObj.rolls.join(' + ')} )`];
@@ -241,7 +241,7 @@ function lancerDe() {
         resumeTexte += `💥 Dégâts critiques : (${baseDegatsTexte}) × 2 = ${degatsJetDouble}`;
 
         let bonusParts = [];
-        if (perso.combat.cac !== 0) bonusParts.push(`+ CàC (${perso.combat.cac})`);
+        if (perso.bonusDegatsCAC !== 0) bonusParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
         if (bonusContext !== 0) bonusParts.push(`+ Contexte (${bonusContext})`);
         resumeTexte += ` ${bonusParts.join(' ')} = ${degats}\n`;
 
@@ -249,13 +249,13 @@ function lancerDe() {
       } else {
         // Normal hit
         const degatsRollObj2 = rollDice(formuleDes);
-        degats = degatsRollObj2.total + bonusArmeFixe + perso.combat.cac + bonusContext;
+        degats = degatsRollObj2.total + bonusArmeFixe + perso.bonusDegatsCAC + bonusContext;
         if (degats < 1) degats = 1;
 
         let degatsParts = [];
         if (degatsRollObj2.rolls.length > 0) degatsParts.push(`( ${degatsRollObj2.rolls.join(' + ')} )`);
         if (bonusArmeFixe !== 0) degatsParts.push(`+ ${bonusArmeFixe}`);
-        if (perso.combat.cac !== 0) degatsParts.push(`+ CàC (${perso.combat.cac})`);
+        if (perso.bonusDegatsCAC !== 0) degatsParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
         if (bonusContext !== 0) degatsParts.push(`+ Contexte (${bonusContext})`);
 
         resumeTexte += `Dégâts : ${degatsParts.join(' ')} = ${degats}\n`;
@@ -274,12 +274,12 @@ function lancerDe() {
       resultatTexte = "Résultat : Échec.";
     } else {
       const degatsRollObj = rollDice(armeValeur);
-      degats = degatsRollObj.total + perso.combat.dist + bonusContext;
+      degats = degatsRollObj.total + perso.bonusDegatsDistist + bonusContext;
       if (degats < 1) degats = 1;
 
       let degatsParts = [];
       if (degatsRollObj.rolls.length > 0) degatsParts.push(degatsRollObj.rolls.join(' + '));
-      if (perso.combat.dist !== 0) degatsParts.push(`bonus distance (${perso.combat.dist})`);
+      if (perso.bonusDegatsDistist !== 0) degatsParts.push(`bonus distance (${perso.bonusDegatsDistist})`);
       if (bonusContext !== 0) degatsParts.push(`bonus contexte (${bonusContext})`);
       resumeTexte += `Dégâts (jets + bonus) : ${degatsParts.join(' + ')} = ${degats}\n`;
 
@@ -292,12 +292,12 @@ function lancerDe() {
     jetToucher = jetToucherObj.total;
     let bonusTest = 0;
     switch (armeOpt.dataset.stat) {
-      case "for": bonusTest = perso.bonus.for; break;
-      case "agi": bonusTest = perso.bonus.agi; break;
-      case "int": bonusTest = perso.bonus.int; break;
-      case "end": bonusTest = perso.bonus.end; break;
-      case "cha": bonusTest = perso.bonus.cha; break;
-    }
+    case "for": bonusTest = perso.bonusJetFor; break;
+    case "agi": bonusTest = perso.bonusJetAgi; break;
+    case "int": bonusTest = perso.bonusJetInt; break;
+    case "end": bonusTest = perso.bonusJetEnd; break;
+    case "cha": bonusTest = perso.bonusJetCha; break;
+  }
     const totalTest = jetToucher + bonusTest + bonusContext;
     if (jetToucher === 1) echecCritique = true;
     if (jetToucher === 20) successCritique = true;
@@ -355,7 +355,7 @@ function attaquePNJ() {
 
     const cibleLabel = cible ? cible.nom : (cibleId || "Cible");
     const caCible = cible ? cible.ca : 0;
-    const reducPhy = cible ? cible.reduc.phy : 0;
+    const reducPhy = cible ? cible.reducphy : 0;
 
     let jetToucher = 0;
     let touche = false;
