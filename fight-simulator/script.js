@@ -1,32 +1,67 @@
 // =====================================================
 // 📦 1) Données globales
 // =====================================================
+// Données de base (seulement les stats brutes et infos fixes)
 const gameData = {
   personnages: {
     brakmar: {
-      id: "brakmar",
       nom: "Brakmar",
-      stats: { for: 10, agi: 3, int: 5, end: 8, cha: 6 },
-      bonus: { for: 2, agi: 0, int: 1, end: 1, cha: 1 },
-      combat: { cac: 1, dist: 0, tacle: 2, esquive: 0 },
+      for: 10,
+      agi: 3,
+      int: 5,
+      end: 8,
+      cha: 6,
       niveau: 11,
       ca: 13,
-      reduc: { phy: 2, mag: 0 },
-      pv: 25,
+      reducphy: 2,
+      reducmag: 0,
+      pv: 25
     },
     draner: {
-      id: "draner",
       nom: "Drânër",
-      stats: { for: 5, agi: 10, int: 5, end: 6, cha: 6 },
-      bonus: { for: 1, agi: 2, int: 1, end: 1, cha: 1 },
-      combat: { cac: 0, dist: 1, tacle: 1, esquive: 2 },
+      for: 5,
+      agi: 10,
+      int: 5,
+      end: 6,
+      cha: 6,
       niveau: 11,
       ca: 10,
-      reduc: { phy: 1, mag: 0 },
-      pv: 16,
-    },
-  },
+      reducphy: 1,
+      reducmag: 0,
+      pv: 16
+    }
+  }
 };
+
+// Fonction d’hydratation : calcule automatiquement les bonus à partir des stats
+function hydratePersonnages() {
+  for (const key in gameData.personnages) {
+    const perso = gameData.personnages[key];
+
+    // --- Bonus dégâts ---
+    perso.bonusDegatsCAC   = Math.floor(perso.for / 10); // +1 tous les 10 FOR
+    perso.bonusDegatsDist  = Math.floor(perso.agi / 10); // +1 tous les 10 AGI
+    perso.bonusDegatsSort  = Math.floor(perso.int / 10); // +1 tous les 10 INT
+
+    // --- Bonus jets de caractéristiques ---
+    perso.bonusJetFor = Math.floor(perso.for / 5);  // +1 tous les 5 FOR
+    perso.bonusJetAgi = Math.floor(perso.agi / 5);  // +1 tous les 5 AGI
+    perso.bonusJetInt = Math.floor(perso.int / 5);  // +1 tous les 5 INT
+    perso.bonusJetCha = Math.floor(perso.cha / 3);  // +1 tous les 3 CHA
+    perso.bonusJetEnd = Math.floor(perso.end / 5);  // +1 tous les 5 END
+
+    // --- Spécial ---
+    perso.bonusApprivoiser = Math.floor(perso.cha / 5); // compagnons
+    perso.poidsMax = 20 + perso.for * 2; // poids transportable
+  }
+}
+
+hydratePersonnages();
+
+// Exemple d’utilisation (pas de changement dans ton code actuel)
+const perso = gameData.personnages["brakmar"];
+console.log(perso);
+
 
 // ============================================
 // 🔗 2) Raccourcis DOM
@@ -53,39 +88,37 @@ function afficherStats() {
     return;
   }
 
-  const { stats, bonus, combat, niveau, ca, reduc, pv } = perso;
-
   statsDiv.innerHTML = `
     <h3 id="statsTitle">Stats de ${perso.nom}</h3>
       <div class="table-wrapper">
         <table>
           <tr><th>Caractéristiques</th><th>Stats</th><th>Bonus tests</th></tr>
-          <tr><td>FOR</td><td>${stats.for}</td><td>${bonus.for}</td></tr>
-          <tr><td>AGI</td><td>${stats.agi}</td><td>${bonus.agi}</td></tr>
-          <tr><td>INT</td><td>${stats.int}</td><td>${bonus.int}</td></tr>
-          <tr><td>END</td><td>${stats.end}</td><td>${bonus.end}</td></tr>
-          <tr><td>CHA</td><td>${stats.cha}</td><td>${bonus.cha}</td></tr>
+          <tr><td>FOR</td><td>${perso.for}</td><td>${perso.bonusJetFor}</td></tr>
+          <tr><td>AGI</td><td>${perso.agi}</td><td>${perso.bonusJetAgi}</td></tr>
+          <tr><td>INT</td><td>${perso.int}</td><td>${perso.bonusJetInt}</td></tr>
+          <tr><td>END</td><td>${perso.end}</td><td>${perso.bonusJetEnd}</td></tr>
+          <tr><td>CHA</td><td>${perso.cha}</td><td>${perso.bonusJetCha}</td></tr>
         </table>
       </div>
       <div class="table-wrapper">
         <table>
           <tr><th>Combat</th><th>Corps à Corps</th><th>À Distance</th></tr>
-          <tr><td></td><td>${combat.cac}</td><td>${combat.dist}</td></tr>
-          <tr><th>Contact</th><th>Tacle</th><th>Esquive</th></tr>
-          <tr><td></td><td>${combat.tacle}</td><td>${combat.esquive}</td></tr>
+          <tr><td></td><td>${perso.bonusDegatsCAC}</td><td>${perso.bonusDegatsDist}</td></tr>
         </table>
       </div>
       <div class="table-wrapper">
         <table>
-          <tr><th>Niveau</th><td>${niveau}</td></tr>
-          <tr><th>Classe d'armure</th><td>${ca}</td></tr>
-          <tr><th>Réduction des dégâts physiques</th><td>${reduc.phy}</td></tr>
-          <tr><th>Réduction des dégâts magiques</th><td>${reduc.mag}</td></tr>
-          <tr><th>PV max</th><td>${pv}</td></tr>
+          <tr><th>Niveau</th><td>${perso.niveau}</td></tr>
+          <tr><th>Classe d'armure</th><td>${perso.ca}</td></tr>
+          <tr><th>Réduction des dégâts physiques</th><td>${perso.reducphy}</td></tr>
+          <tr><th>Réduction des dégâts magiques</th><td>${perso.reducmag}</td></tr>
+          <tr><th>PV max</th><td>${perso.pv}</td></tr>
+          <tr><th>Poids max (kg)</th><td>${perso.poidsMax}</td></tr>
         </table>
       </div>
     `;
 }
+
 persoSelect.addEventListener('change', afficherStats);
 afficherStats();
 
@@ -613,16 +646,26 @@ document.addEventListener("DOMContentLoaded", function () {
       cha: "Charisme"
     };
 
+    const bonusMapping = {
+      for: "bonusJetFor",
+      agi: "bonusJetAgi",
+      int: "bonusJetInt",
+      end: "bonusJetEnd",
+      cha: "bonusJetCha"
+    };
+
     for (const option of armeSelect.querySelectorAll("option[data-type='test']")) {
       const stat = option.dataset.stat; // "for", "agi", ...
-      const bonus = perso ? perso.bonus[stat] : 0;
+      const bonusKey = bonusMapping[stat];
+      const bonus = perso ? (perso[bonusKey] ?? 0) : 0;
       const baseLabel = statLabels[stat] || stat;
-      option.textContent = `${baseLabel} (+${bonus})`;
+      option.textContent = `${baseLabel} (${bonus >= 0 ? "+" : ""}${bonus})`;
     }
   }
 
   persoSelect.addEventListener("change", updateTestLabels);
   updateTestLabels();
+});
 
   // === MENU TOGGLE + OVERLAY ===
   const menuToggle = document.getElementById("menuToggle");
@@ -693,7 +736,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const initial = document.querySelector('.tab-content.active');
     if (initial) initial.style.display = '';
   }
-});
 
 // (Duplicata d’onglets
 const tabs = document.querySelectorAll('.tab-button');
