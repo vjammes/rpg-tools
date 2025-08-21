@@ -42,6 +42,9 @@ function hydratePersonnages() {
     perso.bonusDegatsCAC   = Math.floor(perso.for / 10); // +1 tous les 10 FOR
     perso.bonusDegatsDist  = Math.floor(perso.agi / 10); // +1 tous les 10 AGI
     perso.bonusDegatsSort  = Math.floor(perso.int / 10); // +1 tous les 10 INT
+    perso.bonusTacle  = Math.floor(perso.for / 10); // +1 tous les 10 FOR
+    perso.bonusEsquive  = Math.floor(perso.agi / 10); // +1 tous les 10 AGI
+
 
     // --- Bonus jets de caractéristiques ---
     perso.bonusJetFor = Math.floor(perso.for / 5);  // +1 tous les 5 FOR
@@ -83,6 +86,7 @@ let historique = [];
 function afficherStats() {
   const id = persoSelect.value;
   const perso = gameData.personnages[id];
+
   if (!perso) {
     statsDiv.textContent = "Sélectionnez un personnage";
     return;
@@ -90,37 +94,43 @@ function afficherStats() {
 
   statsDiv.innerHTML = `
     <h3 id="statsTitle">Stats de ${perso.nom}</h3>
-      <div class="table-wrapper">
-        <table>
-          <tr><th>Caractéristiques</th><th>Stats</th><th>Bonus tests</th></tr>
-          <tr><td>FOR</td><td>${perso.for}</td><td>${perso.bonusJetFor}</td></tr>
-          <tr><td>AGI</td><td>${perso.agi}</td><td>${perso.bonusJetAgi}</td></tr>
-          <tr><td>INT</td><td>${perso.int}</td><td>${perso.bonusJetInt}</td></tr>
-          <tr><td>END</td><td>${perso.end}</td><td>${perso.bonusJetEnd}</td></tr>
-          <tr><td>CHA</td><td>${perso.cha}</td><td>${perso.bonusJetCha}</td></tr>
-        </table>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <tr><th>Combat</th><th>Corps à Corps</th><th>À Distance</th></tr>
-          <tr><td></td><td>${perso.bonusDegatsCAC}</td><td>${perso.bonusDegatsDist}</td></tr>
-        </table>
-      </div>
-      <div class="table-wrapper">
-        <table>
-          <tr><th>Niveau</th><td>${perso.niveau}</td></tr>
-          <tr><th>Classe d'armure</th><td>${perso.ca}</td></tr>
-          <tr><th>Réduction des dégâts physiques</th><td>${perso.reducphy}</td></tr>
-          <tr><th>Réduction des dégâts magiques</th><td>${perso.reducmag}</td></tr>
-          <tr><th>PV max</th><td>${perso.pv}</td></tr>
-          <tr><th>Poids max (kg)</th><td>${perso.poidsMax}</td></tr>
-        </table>
-      </div>
-    `;
+
+    <div class="table-wrapper">
+      <table>
+        <tr><th>Caractéristiques</th><th>Stats</th><th>Bonus tests</th></tr>
+        <tr><td>FOR</td><td>${perso.for}</td><td>${perso.bonusJetFor}</td></tr>
+        <tr><td>AGI</td><td>${perso.agi}</td><td>${perso.bonusJetAgi}</td></tr>
+        <tr><td>INT</td><td>${perso.int}</td><td>${perso.bonusJetInt}</td></tr>
+        <tr><td>END</td><td>${perso.end}</td><td>${perso.bonusJetEnd}</td></tr>
+        <tr><td>CHA</td><td>${perso.cha}</td><td>${perso.bonusJetCha}</td></tr>
+      </table>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <tr><th>Combat</th><th>Corps à Corps</th><th>À Distance</th></tr>
+        <tr><td></td><td>${perso.bonusDegatsCAC}</td><td>${perso.bonusDegatsDist}</td></tr>
+        <tr><th>Spécial</th><th>Tacle</th><th>Esquive</th></tr>
+        <tr><td></td><td>${perso.bonusTacle}</td><td>${perso.bonusEsquive}</td></tr>
+      </table>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <tr><th>Niveau</th><td>${perso.niveau}</td></tr>
+        <tr><th>Classe d'armure</th><td>${perso.ca}</td></tr>
+        <tr><th>Réduction des dégâts physiques</th><td>${perso.reducphy}</td></tr>
+        <tr><th>Réduction des dégâts magiques</th><td>${perso.reducmag}</td></tr>
+        <tr><th>PV max</th><td>${perso.pv}</td></tr>
+      </table>
+    </div>
+  `;
 }
 
+// Event listener
 persoSelect.addEventListener('change', afficherStats);
 afficherStats();
+
 
 // =====================================================
 // 🎲 4) Utilitaires de dés (identiques à l’existant)
