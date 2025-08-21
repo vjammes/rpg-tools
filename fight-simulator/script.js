@@ -61,6 +61,7 @@ function hydratePersonnages() {
 
 hydratePersonnages();
 
+window.gameData = gameData;
 // Exemple d’utilisation (pas de changement dans ton code actuel)
 const perso = gameData.personnages["brakmar"];
 console.log(perso);
