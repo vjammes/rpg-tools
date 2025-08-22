@@ -383,21 +383,15 @@ function attaquePNJ() {
     const cibleLabel = cible ? cible.nom : (cibleId || "Cible");
     const caCible = cible ? cible.ca : 0;
 
-    // --- Déplacements ici ---
     const typeDegats = document.getElementById("damageTypePNJSelect").value;
     const reducPersoInput = document.getElementById("reduceDamage");
     const reducPerso = reducPersoInput ? parseInt(reducPersoInput.value, 10) || 0 : 0;
 
     let reducCible = 0;
     if (cible) {
-      if (typeDegats === "physique") {
-        reducCible = cible.reducphy;
-      } else if (typeDegats === "magique") {
-        reducCible = cible.reducmag;
-      }
+      if (typeDegats === "physique") reducCible = cible.reducphy || 0;
+      else if (typeDegats === "magique") reducCible = cible.reducmag || 0;
     }
-    // reducCible += reducPerso;  Permet d'ajouter le champ réduction des dégâts de "Personnage" dans le calcul "Ennemis"
-    // ------------------------
 
     let jetToucher = 0;
     let touche = false;
@@ -407,71 +401,76 @@ function attaquePNJ() {
     let resumeText = "";
     let resultatText = "";
 
+    // ---------------- CàC ----------------
     if (type === "cac") {
       const jet = rollDice("1d20");
       jetToucher = jet.total;
+      if (jetToucher === 1) echecCrit = true;
+      if (jetToucher === 20) succesCrit = true;
 
-      if (jetToucher === 1) {
-        echecCrit = true;
-        resultatText = `💥 Échec critique : ${nom} passe son prochain tour !`;
+      touche = jetToucher >= caCible;
+      resumeText += `Jet pour toucher (1d20) : ${jetToucher} = ${jetToucher}\n`;
+      resumeText += touche ? "=> Touché\n" : "=> Raté\n";
+
+      if (!touche) {
+        resultatText = echecCrit ? `💥 Échec critique : ${nom} passe son prochain tour !` : `${nom} rate son attaque (${jetToucher}).`;
       } else {
-        if (jetToucher === 20) succesCrit = true;
-        touche = jetToucher >= caCible;
-        resumeText += `Jet pour toucher (1d20) : ${jetToucher} = ${jetToucher}\n`;
-        resumeText += touche ? "=> Touché\n" : "=> Raté\n";
+        // parsing formule dégâts
+        const exprClean = degatsExpr.replace(/\s+/g, "");
+        let match = exprClean.match(/^(\d+d\d+)([+-]\d+)?$/);
+        let formule = exprClean;
+        let bonusFixe = 0;
+        if (match) {
+          formule = match[1];
+          bonusFixe = parseInt(match[2] || "0", 10);
+        }
 
-        if (touche) {
-          const exprClean = degatsExpr.replace(/\s+/g, "");
-          const m = exprClean.match(/^(\d+d\d+)([+-]\d+)?$/);
-          let formule = exprClean;
-          let bonusFixe = 0;
-          if (m) {
-            formule = m[1];
-            bonusFixe = parseInt(m[2] || "0", 10);
-          }
-          const rollD = rollDice(formule);
-          let baseDeg = rollD.total + bonusFixe;
+        const rollD = rollDice(formule);
+        const baseDes = rollD.total;
+        const bonusPerso = bonusFixe; 
+        let totalAvantReduc = baseDes + bonusPerso;
+        let degatsParts = [`( ${rollD.rolls.join(' + ')} )`];
+        if (bonusPerso !== 0) degatsParts.push(`+ ${bonusPerso}`);
 
-          if (baseDeg < 1) baseDeg = 1;
-          let finalDeg = baseDeg - reducCible;
-          if (finalDeg < 0) finalDeg = 0;
-
-          if (succesCrit) {
-            degats = finalDeg * 2;
-            resumeText += `💥 Dégâts critiques : ( ${rollD.rolls.join(" + ")} )${bonusFixe !== 0 ? ` + ${bonusFixe}` : ""} - Réduc (${reducCible}) × 2 = ${degats}\n`;
-            resultatText = `🎯 Coup critique de ${nom} ! (20) → ${cibleLabel} reçoit ${degats} dégâts`;
-          } else {
-            degats = finalDeg;
-            resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} )${bonusFixe !== 0 ? ` + ${bonusFixe}` : ""} - Réduc (${reducCible}) = ${degats}\n`;
-            resultatText = `${nom} touche ${cibleLabel} ! (${jetToucher}) et lui inflige : ${degats} dégât(s).`;
-          }
+        if (succesCrit) {
+          totalAvantReduc = baseDes * 2 + bonusPerso;
+          degats = totalAvantReduc - reducCible;
+          if (degats < 0) degats = 0;
+          resumeText += `💥 Dégâts critiques : (( ${rollD.rolls.join(' + ')} ) ×2 )${bonusPerso !== 0 ? ` + ${bonusPerso}` : ""} = ${baseDes * 2 + bonusPerso}\n`;
+          if (reducCible > 0) resumeText += `Réd. dégâts (${reducCible}) appliquée → ${degats}\n`;
+          resultatText = `🎯 Coup critique de ${nom} ! → ${cibleLabel} reçoit ${degats} dégâts`;
         } else {
-          resumeText += `Jet pour toucher (1d20) : ${jetToucher} vs CA (${caCible}) => Raté\n`;
-          resultatText = `${nom} rate son attaque (${jetToucher}).`;
+          degats = totalAvantReduc - reducCible;
+          if (degats < 0) degats = 0;
+          resumeText += `Dégâts : ${degatsParts.join(' ')} = ${totalAvantReduc}\n`;
+          if (reducCible > 0) resumeText += `Réd. dégâts (${reducCible}) appliquée → ${degats}\n`;
+          resultatText = `${nom} touche ${cibleLabel} ! (${jetToucher}) → ${degats} dégât(s)`;
         }
       }
 
+    // ---------------- Distance ----------------
     } else if (type === "distance") {
       const jet = rollDice("1d6");
       jetToucher = jet.total;
       touche = (jetToucher > 1) && (jetToucher >= ct);
       resumeText += `Jet pour toucher (1d6) : ${jetToucher} = ${jetToucher}\n`;
       resumeText += touche ? "=> Touché\n" : "=> Raté\n";
-      if (touche) {
+
+      if (!touche) {
+        resultatText = `❌ Échec (${jetToucher} < CT ${ct}).`;
+      } else {
         const rollD = rollDice(degatsExpr);
         let baseDeg = rollD.total;
         if (baseDeg < 1) baseDeg = 1;
         let finalDeg = baseDeg - reducCible;
         if (finalDeg < 0) finalDeg = 0;
-
         degats = finalDeg;
 
-        resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} ) → Base ${baseDeg} - Réduc (${reducCible}) = ${degats}\n`;
-        resultatText = `${nom} → ${cibleLabel} Touché ! (${jetToucher}) → Dégât(s) infligé(s) : ${degats}`;
-      } else {
-        resumeText += `Jet pour toucher (1d6) : ${jetToucher} vs CT (${ct}) => Raté\n`;
-        resultatText = `❌ Échec (${jetToucher} < CT ${ct}).`;
+        resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${baseDeg}\n`;
+        if (reducCible > 0) resumeText += `Réd. dégâts (${reducCible}) appliquée → ${degats}\n`;
+        resultatText = `${nom} → ${cibleLabel} Touché ! (${jetToucher}) → ${degats} dégât(s) infligé(s)`;
       }
+
     } else {
       resultatText = "Type d'attaque PNJ inconnu.";
     }
@@ -495,6 +494,7 @@ function attaquePNJ() {
     if (out) out.textContent = "Erreur : expression de dégâts invalide ou élément absent.";
   }
 }
+
 
 
 // =====================================================
