@@ -137,15 +137,29 @@ afficherStats();
 
 
 // =====================================================
-// 🎲 4) Utilitaires de dés (identiques à l’existant)
+// 🎲 4) Utilitaires de dés 
 // =====================================================
 function rollDice(expr) {
-  // Exemple d'expr : "2d10+4" ou "1d6-2"
+  expr = expr.replace(/\s+/g, ''); // supprime les espaces
+
+  // Cas intervalle "A-B"
+  const intervalleMatch = expr.match(/^(\d+)-(\d+)$/);
+  if (intervalleMatch) {
+    const min = parseInt(intervalleMatch[1], 10);
+    const max = parseInt(intervalleMatch[2], 10);
+    if (min > max) throw new Error("Intervalle invalide : " + expr);
+
+    const valeur = Math.floor(Math.random() * (max - min + 1)) + min;
+    return { total: valeur, rolls: [valeur], bonus: 0 };
+  }
+
+  // Cas classique "XdY+Z"
   const regex = /^(\d+)d(\d+)([+-]\d+)?$/i;
   const match = expr.match(regex);
   if (!match) {
     throw new Error("Expression de dé invalide : " + expr);
   }
+
   const count = parseInt(match[1], 10);
   const sides = parseInt(match[2], 10);
   const bonus = match[3] ? parseInt(match[3], 10) : 0;
@@ -154,12 +168,11 @@ function rollDice(expr) {
   for (let i = 0; i < count; i++) {
     rolls.push(Math.floor(Math.random() * sides) + 1);
   }
+
   const totalRoll = rolls.reduce((a, b) => a + b, 0);
   let total = totalRoll + bonus;
 
-  // Dégâts minimum 1
-  if (total < 1) total = 1;
-
+  if (total < 1) total = 1; // minimum 1
   return { total, rolls, bonus };
 }
 
@@ -168,9 +181,9 @@ function rollDice(expr) {
 //     - CàC : d20 + bonus ; 1 = échec critique ; 20 = critique (dégâts doublés)
 //     - Distance : d6 pour toucher, dégâts = formule + bonusDist + contexte
 //     - Tests : d20 + bonus de la carac
-//     - Parsing dégâts "XdY+Z" inchangé
+//     - Parsing dégâts "XdY+Z" et "A-B"
 // =====================================================
-function lancerDe() {
+function attaquePerso() {
   const id = persoSelect.value;
   const perso = gameData.personnages[id];
   const persoNom = perso.nom;
@@ -191,7 +204,7 @@ function lancerDe() {
   let jetToucher = 0;
   let degats = 0;
 
-  // Récupération réduction perso
+  // Réduction perso
   const reducPersoInput = document.getElementById("reduceDamage");
   const reducPerso = reducPersoInput ? parseInt(reducPersoInput.value, 10) || 0 : 0;
 
@@ -236,7 +249,7 @@ function lancerDe() {
       if (successCritique) {
         const baseDes = degatsRollObj.total;
         const desMultiplies = baseDes * 2;
-        const bonusFixe = bonusArmeFixe + perso.bonusDegatsCAC + bonusContext;
+        const bonusFixe = bonusArmeFixe + (perso.bonusDegatsCAC || 0) + bonusContext;
         const totalAvantReduc = desMultiplies + bonusFixe;
 
         degats = totalAvantReduc - reducPerso;
@@ -245,7 +258,7 @@ function lancerDe() {
         let degatsParts = [`(( ${degatsRollObj.rolls.join(' + ')} ) ×2 )`];
         let bonusParts = [];
         if (bonusArmeFixe !== 0) bonusParts.push(`+ bonus arme (${bonusArmeFixe})`);
-        if (perso.bonusDegatsCAC !== 0) bonusParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
+        if ((perso.bonusDegatsCAC || 0) !== 0) bonusParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
         if (bonusContext !== 0) bonusParts.push(`+ Contexte (${bonusContext})`);
 
         resumeTexte += `💥 Dégâts critiques : ${degatsParts.join(' ')} ${bonusParts.join(' ')} = ${totalAvantReduc}\n`;
@@ -253,7 +266,7 @@ function lancerDe() {
         resultatTexte = `🎯 Coup critique ! → Dégâts : ${degats}`;
       } else {
         const baseDes = degatsRollObj.total;
-        const bonusFixe = bonusArmeFixe + perso.bonusDegatsCAC + bonusContext;
+        const bonusFixe = bonusArmeFixe + (perso.bonusDegatsCAC || 0) + bonusContext;
         const totalAvantReduc = baseDes + bonusFixe;
 
         degats = totalAvantReduc - reducPerso;
@@ -262,7 +275,7 @@ function lancerDe() {
         let degatsParts = [`( ${degatsRollObj.rolls.join(' + ')} )`];
         let bonusParts = [];
         if (bonusArmeFixe !== 0) bonusParts.push(`+ bonus arme (${bonusArmeFixe})`);
-        if (perso.bonusDegatsCAC !== 0) bonusParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
+        if ((perso.bonusDegatsCAC || 0) !== 0) bonusParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
         if (bonusContext !== 0) bonusParts.push(`+ Contexte (${bonusContext})`);
 
         resumeTexte += `Dégâts : ${degatsParts.join(' ')} ${bonusParts.join(' ')} = ${totalAvantReduc}\n`;
@@ -276,7 +289,7 @@ function lancerDe() {
     jetToucher = jetToucherObj.total;
     touche = jetToucher >= seuil;
     resumeTexte += `Jet pour toucher (1d6) : ${jetToucher} vs seuil (${seuil})\n`;
-    resumeTexte += touche ? "=> Touché /\n" : "=> Raté.\n";
+    resumeTexte += touche ? "=> Touché\n" : "=> Raté\n";
 
     if (!touche) {
       resultatTexte = "Résultat : Échec.";
@@ -523,7 +536,7 @@ const chasseData = {
 // =====================================================
 // 🎲 8) Utilitaires chasse
 // =====================================================
-function lancerDes(faces) {
+function lancerDe(faces) {
   return Math.floor(Math.random() * faces) + 1;
 }
 
@@ -536,7 +549,7 @@ function evalDegats(expr) {
     const [, n, faces] = match;
     let total = 0;
     for (let i = 0; i < parseInt(n, 10); i++) {
-      total += lancerDes(parseInt(faces, 10));
+      total += lancerDe(parseInt(faces, 10));
     }
     return total;
   }
@@ -583,7 +596,7 @@ function lancerChasse() {
     if (pvActuels <= 0) break;
 
     if (!cible) {
-      const jetPistage = lancerDes(20) + bonusPistage;
+      const jetPistage = lancerDe(20) + bonusPistage;
       cible = trouverAnimal(zone, jetPistage);
 
       if (!cible) {
@@ -595,7 +608,7 @@ function lancerChasse() {
       log.push(`- *Heure ${h}* : ${nomChasseur} continue le combat contre *${cible.animal}*.`);
     }
 
-    const jetAction = lancerDes(20) + bonusChasse;
+    const jetAction = lancerDe(20) + bonusChasse;
     const seuil = methode === "brutale" ? cible.jets.FOR :
                   methode === "discrete" ? cible.jets.AGI :
                   cible.jets.CHA;
