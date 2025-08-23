@@ -17,7 +17,7 @@ const gameData = {
       reducmag: 0,
       pv: 25,
       pistage: 0,
-      chasse: 0
+      chasse: 0,
     },
     draner: {
       nom: "Drânër",
@@ -65,7 +65,7 @@ function hydratePersonnages() {
 hydratePersonnages();
 
 window.gameData = gameData;
-// Exemple d’utilisation (pas de changement dans ton code actuel)
+// Exemple d’utilisation 
 const perso = gameData.personnages["brakmar"];
 console.log(perso);
 
@@ -582,8 +582,11 @@ function lancerChasse() {
   const duree = parseInt(document.getElementById("tempsChasse").value, 10);
   const methode = document.getElementById("methodeChasse").value;
   const priorite = document.getElementById("prioriteChasse").value;
-  const bonusPistage = parseInt(document.getElementById("bonusPistage").value, 10) || 0;
-  const bonusChasse = parseInt(document.getElementById("bonusChasse").value, 10) || 0;
+
+  const bonusPistage = (chasseur && chasseur.pistage) || 0;
+  const bonusChasse = (chasseur && chasseur.chasse) || 0;
+  const bonusApprivoiser = (chasseur && chasseur.bonusApprivoiser) || 0;
+
   let pvActuels = parseInt(document.getElementById("pvActuels").value, 10) || (chasseur ? chasseur.pv : 10);
 
   let pvPerdus = 0;
@@ -591,14 +594,16 @@ function lancerChasse() {
   let compagnons = [];
   let log = [];
   let cible = null;
-
-  let stopChasse = false; 
+  let stopChasse = false;
 
   for (let h = 1; h <= duree; h++) {
-    if (pvActuels <= 0 || stopChasse) break; // on arrête si mort ou compagnon trouvé
+    if (pvActuels <= 0 || stopChasse) break;
 
+    // --- Pistage ---
     if (!cible) {
-      const jetPistage = lancerDe(20) + bonusPistage;
+      const dePistage = lancerDe(20);
+      const jetPistage = dePistage + bonusPistage;
+      log.push(`- *Heure ${h}* : Jet de pistage ${dePistage} (+${bonusPistage} bonus) = ${jetPistage}`);
       cible = trouverAnimal(zone, jetPistage);
 
       if (!cible) {
@@ -610,68 +615,84 @@ function lancerChasse() {
       log.push(`- *Heure ${h}* : ${nomChasseur} continue le combat contre *${cible.animal}*.`);
     }
 
-    // Gestion priorité compagnon
+    // --- Priorité compagnon ---
     if (priorite === "compagnon" && cible.jets.CHA) {
-      const jetAction = lancerDe(20) + bonusChasse;
+      const deCha = lancerDe(20);
+      const jetAction = deCha + bonusApprivoiser;
+      const texteJet = `${deCha} (+${bonusApprivoiser} bonus apprivoisement) = ${jetAction}`;
       const seuil = cible.jets.CHA;
 
       if (jetAction >= seuil) {
         compagnons.push(cible.animal);
-        log.push(`    - Jet CHA ${jetAction} (≥ ${seuil}) → Succès ! ${cible.animal} devient un compagnon 🐾`);
+        log.push(`    - Jet CHA ${texteJet} (≥ ${seuil}) → Succès ! ${cible.animal} devient un compagnon 🐾`);
         log.push(`⚑ La chasse s'arrête car ${nomChasseur} a trouvé un compagnon 🐾`);
         cible = null;
-        stopChasse = true; // si un compagnon est trouvé, on arrête la chasse immédiatement.
+        stopChasse = true;
       } else {
         const dmg = evalDegats(cible.degats);
         pvActuels -= dmg;
         pvPerdus += dmg;
-        log.push(`    - Jet CHA ${jetAction} (< ${seuil}) → Échec, ${cible.animal} riposte (-${dmg} PV, reste ${pvActuels}).`);
+        log.push(`    - Jet CHA ${texteJet} (< ${seuil}) → Échec, ${cible.animal} riposte (-${dmg} PV, reste ${pvActuels}).`);
       }
     } else {
-      // Combat normal
-      const jetAction = lancerDe(20) + bonusChasse;
+      // --- Combat normal ---
+      const deChasse = lancerDe(20);
+      const jetAction = deChasse + bonusChasse;
+      const texteJet = `${deChasse} (+${bonusChasse} bonus chasse) = ${jetAction}`;
       const seuil = methode === "brutale" ? cible.jets.FOR :
                     methode === "discrete" ? cible.jets.AGI :
                     cible.jets.CHA;
 
       if (seuil && jetAction >= seuil) {
         let lootTrouve = [];
+        let lootNotes = {};
+
         cible.loot.forEach(obj => {
           const quantite = evalDegats(obj.q || obj.de || "1");
-          if (quantite > 0) lootTrouve.push(`${quantite} ${obj.t}`);
+          lootTrouve.push({ q: quantite, t: obj.t });
         });
 
-        // Priorités (inchangées pour l’instant)
+        // Application des priorités
         if (priorite === "viande") {
-          const viandeIndex = lootTrouve.findIndex(l => l.includes("viande"));
-          if (viandeIndex >= 0) {
-            lootTrouve[viandeIndex] = lootTrouve[viandeIndex].replace(/(\d+)/, (m) => parseInt(m) + 1);
-            const autreIndex = lootTrouve.findIndex(l => !l.includes("viande"));
-            if (autreIndex >= 0) {
-              lootTrouve[autreIndex] = lootTrouve[autreIndex].replace(/(\d+)/, (m) => Math.max(0, parseInt(m) - 1));
-            }
+          const viande = lootTrouve.find(l => l.t.includes("viande"));
+          if (viande) {
+            viande.q += 1;
+            lootNotes[viande.t] = "+1 bonus priorité";
+          }
+          const autre = lootTrouve.find(l => !l.t.includes("viande"));
+          if (autre) {
+            autre.q = Math.max(0, autre.q - 1);
+            lootNotes[autre.t] = "-1 malus priorité";
           }
         }
 
         if (priorite === "ressource") {
-          const autreIndex = lootTrouve.findIndex(l => !l.includes("viande"));
-          if (autreIndex >= 0) {
-            lootTrouve[autreIndex] = lootTrouve[autreIndex].replace(/(\d+)/, (m) => parseInt(m) + 1);
+          const autre = lootTrouve.find(l => !l.t.includes("viande"));
+          if (autre) {
+            autre.q += 1;
+            lootNotes[autre.t] = "+1 bonus priorité";
           }
-          const viandeIndex = lootTrouve.findIndex(l => l.includes("viande"));
-          if (viandeIndex >= 0) {
-            lootTrouve[viandeIndex] = lootTrouve[viandeIndex].replace(/(\d+)/, (m) => Math.max(0, parseInt(m) - 1));
+          const viande = lootTrouve.find(l => l.t.includes("viande"));
+          if (viande) {
+            viande.q = Math.max(0, viande.q - 1);
+            lootNotes[viande.t] = "-1 malus priorité";
           }
         }
 
-        butin.push(...lootTrouve);
-        log.push(`    - Jet ${jetAction} (≥ ${seuil}) → Succès ! ${cible.animal} est vaincu et rapporte *${lootTrouve.join(", ")}*.`);
+        const lootTextes = lootTrouve.map(l => {
+          let texte = `${l.q} ${l.t}`;
+          if (lootNotes[l.t]) texte += ` (${lootNotes[l.t]})`;
+          return texte;
+        });
+
+        butin.push(...lootTextes);
+        log.push(`    - Jet ${texteJet} (≥ ${seuil}) → Succès ! ${cible.animal} est vaincu et rapporte *${lootTextes.join(", ")}*.`);
         cible = null;
       } else {
         const dmg = evalDegats(cible.degats);
         pvActuels -= dmg;
         pvPerdus += dmg;
-        log.push(`    - Jet ${jetAction} (< ${seuil}) → Échec, ${cible.animal} riposte (-${dmg} PV, reste ${pvActuels}).`);
+        log.push(`    - Jet ${texteJet} (< ${seuil}) → Échec, ${cible.animal} riposte (-${dmg} PV, reste ${pvActuels}).`);
       }
     }
 
@@ -684,6 +705,7 @@ function lancerChasse() {
     }
   }
 
+  // --- Regrouper le butin ---
   const lootCompteur = {};
   butin.forEach(item => {
     const match = item.match(/(\d+)\s+(.+)/);
@@ -696,14 +718,15 @@ function lancerChasse() {
   });
   const butinRegroupe = Object.entries(lootCompteur).map(([type, quantite]) => `${quantite} ${type}`);
 
+  // --- Affichage final ---
   document.getElementById("resultatChasse").innerHTML =
     `### Résumé de la chasse<br>` +
     log.join("<br>") + `<br><br>` +
     `<strong>Bilan : ${nomChasseur}</strong><br>` +
-    `PV restants : ${pvActuels}<br>` +
-    `PV perdus : ${pvPerdus}<br>` +
-    `Butin : ${butinRegroupe.join(", ") || "Aucun"}<br>` +
-    (priorite === "compagnon" ? `Compagnons : ${compagnons.join(", ") || "Aucun"}` : "");
+    `PV restants ❤️: ${pvActuels}<br>` +
+    `PV perdus 💔: ${pvPerdus}<br>` +
+    `Butin 🥩: ${butinRegroupe.join(", ") || "Aucun"}<br>` +
+    (priorite === "compagnon" ? `Compagnon 🐾 : ${compagnons.join(", ") || "Aucun"}` : "");
 
   const historiqueDivLocal = document.getElementById("historique"); 
   if (!window.historiqueChasses) window.historiqueChasses = []; 
@@ -716,6 +739,7 @@ function lancerChasse() {
 
   historiqueDivLocal.textContent = window.historiqueChasses.join("\n---\n");
 }
+
 
 
 
