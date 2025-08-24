@@ -164,17 +164,21 @@
       <option value="compagnon">Compagnon (tente apprivoisement si possible)</option>
     </select><br>
 
-    <label>Bonus Pistage :</label>
-    <input type="number" id="bonusPistage" value="0">
+    <button id="toggleBonusBtn" class="mini-btn">Voir plus ▼</button>
 
-    <label>Bonus Chasse :</label>
-    <input type="number" id="bonusChasse" value="0">
+    <div id="bonusContainer" style="display:none; margin-top:10px;">
+        <label>Bonus Pistage :</label>
+        <input type="number" id="bonusPistage" value="0"><br>
 
-    <label>Bonus Apprivoiser :</label>
-    <input type="number" id="bonusApprivoiser" value="0">
+        <label>Bonus Chasse :</label>
+        <input type="number" id="bonusChasse" value="0"><br>
 
-    <label>Bonus Loot :</label>
-    <input type="number" id="bonusLoot" value="0">
+        <label>Bonus Apprivoiser :</label>
+        <input type="number" id="bonusApprivoiser" value="0"><br>
+
+        <label>Bonus Loot :</label>
+        <input type="number" id="bonusLoot" value="0"><br>
+    </div>
 
     <button onclick="lancerChasse()">Lancer la chasse</button>
 

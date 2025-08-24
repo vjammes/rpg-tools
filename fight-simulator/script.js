@@ -497,9 +497,16 @@ function lancerChasse() {
   const methode = document.getElementById("methodeChasse").value;
   const priorite = document.getElementById("prioriteChasse").value;
 
-  const bonusPistage = (chasseur && chasseur.pistage) || 0;
-  const bonusChasse = (chasseur && chasseur.chasse) || 0;
-  const bonusApprivoiser = (chasseur && chasseur.bonusApprivoiser) || 0;
+  // --- BONUS depuis l'UI ---
+  const bonusPistageContext = parseInt(document.getElementById("bonusPistage").value, 10) || 0;
+  const bonusChasseContext = parseInt(document.getElementById("bonusChasse").value, 10) || 0;
+  const bonusApprivoiserContext = parseInt(document.getElementById("bonusApprivoiser").value, 10) || 0;
+  const bonusLoot = parseInt(document.getElementById("bonusLoot").value, 10) || 0;
+
+  // --- BONUS PASSIFS du personnage ---
+  const bonusPistage = bonusPistageContext + (chasseur ? chasseur.pistage : 0);
+  const bonusChasse = bonusChasseContext + (chasseur ? chasseur.chasse : 0);
+  const bonusApprivoiser = bonusApprivoiserContext + (chasseur ? chasseur.bonusApprivoiser : 0);
 
   let pvActuels = parseInt(document.getElementById("pvActuels").value, 10) || (chasseur ? chasseur.pv : 10);
   let pvPerdus = 0;
@@ -522,12 +529,11 @@ function lancerChasse() {
         log.push(`- *Heure ${h}* : 🎲 Jet de pistage ${dePistage} (+${bonusPistage} bonus) = ${jetPistage} → Rien trouvé`);
         continue;
       }
-      
+
       log.push(`- *Heure ${h}* : 🎲 Jet de pistage ${dePistage} (+${bonusPistage} bonus) = ${jetPistage} → 🎯 ${nomChasseur} rencontre *${cible.animal}* !`);
     } else {
       log.push(`- *Heure ${h}* : ${nomChasseur} continue le combat contre *${cible.animal}*.`);
     }
-
 
     // --- Priorité compagnon / apprivoisement ---
     if (priorite === "compagnon" && cible.jets.CHA) {
@@ -559,9 +565,8 @@ function lancerChasse() {
 
       if (seuil && jetAction >= seuil) {
         let lootTrouve = [];
-        let lootNotes = {};
         cible.loot.forEach(obj => {
-          const quantite = evalDegats(obj.q || obj.de || "1");
+          let quantite = evalDegats(obj.q || obj.de || "1") + bonusLoot;
           lootTrouve.push({ q: quantite, t: obj.t });
         });
 
@@ -600,6 +605,7 @@ function lancerChasse() {
     }
   }
 
+  // --- regroupement du butin ---
   const lootCompteur = {};
   butin.forEach(item => {
     const match = item.match(/(\d+)\s+(.+)/);
@@ -612,9 +618,11 @@ function lancerChasse() {
   });
   const butinRegroupe = Object.entries(lootCompteur).map(([type, quantite]) => `${quantite} ${type}`);
 
+  // --- Affichage final avec rappel des bonus ---
   document.getElementById("resultatChasse").innerHTML =
     `### Résumé de la chasse<br>` +
     log.join("<br>") + `<br><br>` +
+    `(Bonus utilisés : Pistage +${bonusPistage}, Chasse +${bonusChasse}, Apprivoiser +${bonusApprivoiser}, Loot +${bonusLoot})<br>` +
     `<strong>Bilan : ${nomChasseur}</strong><br>` +
     `PV restants ❤️: ${pvActuels}<br>` +
     `PV perdus 💔: ${pvPerdus}<br>` +
@@ -631,6 +639,8 @@ function lancerChasse() {
   if (window.historiqueChasses.length > 10) window.historiqueChasses.pop();
   historiqueDivLocal.textContent = window.historiqueChasses.join("\n---\n");
 }
+
+
 
 // =====================================================
 // 🧭 10) Initialisations DOMContentLoaded
@@ -800,3 +810,24 @@ tabs.forEach((tab, idx) => {
     contents[idx].classList.add('active');
   });
 });
+
+
+  // === GESTION DES BONUS CHASSE ===
+document.addEventListener("DOMContentLoaded", function() {
+  const toggleBtn = document.getElementById("toggleBonusBtn");
+  const container = document.getElementById("bonusContainer");
+
+  if (toggleBtn && container) {
+    toggleBtn.addEventListener("click", function() {
+      if(container.style.display === "none") {
+        container.style.display = "block";
+        this.textContent = "Voir moins ▲";
+      } else {
+        container.style.display = "none";
+        this.textContent = "Voir plus ▼";
+      }
+    });
+  }
+});
+
+

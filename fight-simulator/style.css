@@ -177,6 +177,38 @@ button:hover {
 }
 
 /* =======================
+   Voir plus
+======================= */
+
+.mini-btn {
+  background: none;
+  border: none;
+  color: #16406A;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.3s, border-color 0.3s;
+
+  -webkit-appearance: none;  /* Chrome/Safari */
+  -moz-appearance: none;     /* Firefox */
+  appearance: none;          /* Standard */
+}
+
+.mini-btn:hover {
+  color: #023e8a;
+  text-decoration: underline;
+  background: none;           /* empêche le bleu au hover */
+}
+
+.mini-btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+
+/* =======================
    Historique
 ======================= */
 #historique {
