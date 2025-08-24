@@ -813,21 +813,20 @@ tabs.forEach((tab, idx) => {
 
 
   // === GESTION DES BONUS CHASSE ===
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("toggleBonusBtn");
-  const container = document.getElementById("bonusContainer");
-
-  if (toggleBtn && container) {
-    toggleBtn.addEventListener("click", function() {
-      if(container.style.display === "none") {
-        container.style.display = "block";
-        this.textContent = "Voir moins ▲";
-      } else {
-        container.style.display = "none";
-        this.textContent = "Voir plus ▼";
-      }
-    });
-  }
+  const bonusContainer = document.getElementById("bonusContainer");
+  
+  toggleBtn.addEventListener("click", () => {
+    if (bonusContainer.style.display === "none") {
+      bonusContainer.style.display = "block";
+      toggleBtn.textContent = "Voir moins ▲";
+    } else {
+      bonusContainer.style.display = "none";
+      toggleBtn.textContent = "Voir plus ▼";
+    }
+  });
 });
+
 
 
