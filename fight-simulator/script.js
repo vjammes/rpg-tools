@@ -177,11 +177,27 @@ function rollDice(expr) {
 }
 
 // =====================================================
-// ⚔️ 5) Lancer d’un personnage 
-//     - CàC : d20 + bonus ; 1 = échec critique ; 20 = critique (dégâts doublés)
-//     - Distance : d6 pour toucher, dégâts = formule + bonusDist + contexte
-//     - Tests : d20 + bonus de la carac
-//     - Parsing dégâts "XdY+Z" et "A-B"
+// 📌 Utilitaire : bouton copier
+// =====================================================
+function addCopyButton(buttonId, targetId) {
+  const btn = document.getElementById(buttonId);
+  const target = document.getElementById(targetId);
+  if (!btn || !target) return;
+
+  btn.addEventListener("click", () => {
+    const texte = target.textContent
+      .replace(/\*\*(.*?)\*\*/g, "*$1*")   // conversion markdown bold → WhatsApp
+      .replace(/_(.*?)_/g, "_$1_");       // italique reste pareil
+
+    navigator.clipboard.writeText(texte).then(() => {
+      btn.textContent = "✅ Copié !";
+      setTimeout(() => (btn.textContent = "📋 Copier"), 1500);
+    });
+  });
+}
+
+// =====================================================
+// ⚔️ 5) Attaque Personnage (PJ)
 // =====================================================
 function attaquePerso() {
   const id = persoSelect.value;
@@ -204,7 +220,6 @@ function attaquePerso() {
   let jetToucher = 0;
   let degats = 0;
 
-  // Réduction perso
   const reducPersoInput = document.getElementById("reduceDamage");
   const reducPerso = reducPersoInput ? parseInt(reducPersoInput.value, 10) || 0 : 0;
 
@@ -219,13 +234,9 @@ function attaquePerso() {
     const totalToucher = jetToucher + bonusTest + bonusContext;
     touche = totalToucher >= seuil;
 
-    let toucherParts = [`${jetToucher}`];
-    if (bonusTest !== 0) toucherParts.push(`bonus test (${bonusTest})`);
-    if (bonusContext !== 0) toucherParts.push(`bonus contexte (${bonusContext})`);
-    resumeTexte += `Jet pour toucher (1d20) : ${toucherParts.join(' + ')} = ${totalToucher}\n`;
-    resumeTexte += touche ? "=> Touché\n" : "=> Raté\n";
+    resumeTexte += `🎲 Jet (1d20) : ${jetToucher} + bonus = ${totalToucher}\n`;
+    resumeTexte += touche ? "✅ Touché\n" : "❌ Raté\n";
 
-    // séparation dés et bonus fixe de l’arme
     const armeValeurClean = armeValeur.replace(/\s+/g, "");
     const match = armeValeurClean.match(/^(\d+d\d+)([+-]\d+)?$/);
     let formuleDes = armeValeurClean;
@@ -241,46 +252,25 @@ function attaquePerso() {
         resumeTexte += `💥 Échec critique : ${persoNom} perd son prochain tour.\n`;
         resultatTexte = `💀 Échec critique ! → ${persoNom} passe son prochain tour.`;
       } else {
-        resultatTexte = "Résultat : Échec.";
+        resultatTexte = "❌ Résultat : Échec.";
       }
     } else {
       const degatsRollObj = rollDice(formuleDes);
+      const baseDes = degatsRollObj.total;
+      const bonusFixe = bonusArmeFixe + (perso.bonusDegatsCAC || 0) + bonusContext;
 
       if (successCritique) {
-        const baseDes = degatsRollObj.total;
-        const desMultiplies = baseDes * 2;
-        const bonusFixe = bonusArmeFixe + (perso.bonusDegatsCAC || 0) + bonusContext;
-        const totalAvantReduc = desMultiplies + bonusFixe;
-
-        degats = totalAvantReduc - reducPerso;
-        if (degats < 0) degats = 0;
-
-        let degatsParts = [`(( ${degatsRollObj.rolls.join(' + ')} ) ×2 )`];
-        let bonusParts = [];
-        if (bonusArmeFixe !== 0) bonusParts.push(`+ bonus arme (${bonusArmeFixe})`);
-        if ((perso.bonusDegatsCAC || 0) !== 0) bonusParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
-        if (bonusContext !== 0) bonusParts.push(`+ Contexte (${bonusContext})`);
-
-        resumeTexte += `💥 Dégâts critiques : ${degatsParts.join(' ')} ${bonusParts.join(' ')} = ${totalAvantReduc}\n`;
-        if (reducPerso > 0) resumeTexte += `Réd. dégâts (${reducPerso}) appliquée → ${degats}\n`;
-        resultatTexte = `🎯 Coup critique ! → Dégâts : ${degats}`;
+        const totalAvantReduc = baseDes * 2 + bonusFixe;
+        degats = Math.max(0, totalAvantReduc - reducPerso);
+        resumeTexte += `💥 Dégâts critiques : ( ${degatsRollObj.rolls.join(" + ")} ×2 ) + bonus = ${totalAvantReduc}\n`;
+        if (reducPerso > 0) resumeTexte += `🔻 Réduction (${reducPerso}) → ${degats}\n`;
+        resultatTexte = `🎯 Coup critique ! → ${degats} dégâts`;
       } else {
-        const baseDes = degatsRollObj.total;
-        const bonusFixe = bonusArmeFixe + (perso.bonusDegatsCAC || 0) + bonusContext;
         const totalAvantReduc = baseDes + bonusFixe;
-
-        degats = totalAvantReduc - reducPerso;
-        if (degats < 0) degats = 0;
-
-        let degatsParts = [`( ${degatsRollObj.rolls.join(' + ')} )`];
-        let bonusParts = [];
-        if (bonusArmeFixe !== 0) bonusParts.push(`+ bonus arme (${bonusArmeFixe})`);
-        if ((perso.bonusDegatsCAC || 0) !== 0) bonusParts.push(`+ CàC (${perso.bonusDegatsCAC})`);
-        if (bonusContext !== 0) bonusParts.push(`+ Contexte (${bonusContext})`);
-
-        resumeTexte += `Dégâts : ${degatsParts.join(' ')} ${bonusParts.join(' ')} = ${totalAvantReduc}\n`;
-        if (reducPerso > 0) resumeTexte += `Réd. dégâts (${reducPerso}) appliquée → ${degats}\n`;
-        resultatTexte = `Touché ! (${jetToucher}) → Dégâts infligés : ${degats}`;
+        degats = Math.max(0, totalAvantReduc - reducPerso);
+        resumeTexte += `⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} ) + bonus = ${totalAvantReduc}\n`;
+        if (reducPerso > 0) resumeTexte += `🔻 Réduction (${reducPerso}) → ${degats}\n`;
+        resultatTexte = `✅ Touché ! → ${degats} dégâts`;
       }
     }
 
@@ -288,110 +278,53 @@ function attaquePerso() {
     const jetToucherObj = rollDice("1d6");
     jetToucher = jetToucherObj.total;
     touche = jetToucher >= seuil;
-    resumeTexte += `Jet pour toucher (1d6) : ${jetToucher} vs seuil (${seuil})\n`;
-    resumeTexte += touche ? "=> Touché\n" : "=> Raté\n";
+    resumeTexte += `🎯 Jet distance (1d6) : ${jetToucher} vs seuil ${seuil}\n`;
+    resumeTexte += touche ? "✅ Touché\n" : "❌ Raté\n";
 
     if (!touche) {
-      resultatTexte = "Résultat : Échec.";
+      resultatTexte = "❌ Résultat : Échec.";
     } else {
       const degatsRollObj = rollDice(armeValeur);
       const baseDes = degatsRollObj.total;
       const bonusFixe = (perso.bonusDegatsDist || 0) + bonusContext;
       const totalAvantReduc = baseDes + bonusFixe;
 
-      degats = totalAvantReduc - reducPerso;
-      if (degats < 0) degats = 0;
-
-      let degatsParts = [`(${degatsRollObj.rolls.join(' + ')})`];
-      let bonusParts = [];
-      if ((perso.bonusDegatsDist || 0) !== 0) bonusParts.push(`+ bonus distance (${perso.bonusDegatsDist})`);
-      if (bonusContext !== 0) bonusParts.push(`+ Contexte (${bonusContext})`);
-
-      resumeTexte += `Dégâts : ${degatsParts.join(' ')} ${bonusParts.join(' ')} = ${totalAvantReduc}\n`;
-      if (reducPerso > 0) resumeTexte += `Réd. dégâts (${reducPerso}) appliquée → ${degats}\n`;
-      resultatTexte = `Touché ! (${jetToucher}) → Dégâts infligés : ${degats}`;
+      degats = Math.max(0, totalAvantReduc - reducPerso);
+      resumeTexte += `⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} ) + bonus = ${totalAvantReduc}\n`;
+      if (reducPerso > 0) resumeTexte += `🔻 Réduction (${reducPerso}) → ${degats}\n`;
+      resultatTexte = `✅ Touché ! → ${degats} dégâts`;
     }
 
-  } else if (armeType === "test") {
-    const jetToucherObj = rollDice("1d20");
-    jetToucher = jetToucherObj.total;
-    let bonusTest = 0;
-    switch (armeOpt.dataset.stat) {
-      case "for": bonusTest = perso.bonusJetFor; break;
-      case "agi": bonusTest = perso.bonusJetAgi; break;
-      case "int": bonusTest = perso.bonusJetInt; break;
-      case "end": bonusTest = perso.bonusJetEnd; break;
-      case "cha": bonusTest = perso.bonusJetCha; break;
-    }
-    const totalTest = jetToucher + bonusTest + bonusContext;
-    if (jetToucher === 1) echecCritique = true;
-    if (jetToucher === 20) successCritique = true;
-
-    touche = totalTest >= seuil;
-    resumeTexte += `Jet de test (1d20) : ${jetToucher} + bonus test (${bonusTest}) + bonus contexte (${bonusContext}) = ${totalTest}\n`;
-    resumeTexte += touche ? "=> Réussite\n" : "=> Échec\n";
-    if (echecCritique) {
-      resultatTexte = "Résultat : Échec critique !";
-    } else if (successCritique) {
-      resultatTexte = "Résultat : Succès critique !";
-    } else if (!touche) {
-      resultatTexte = "Résultat : Échec.";
-    } else {
-      resultatTexte = "Résultat : Réussite.";
-    }
   } else {
     resultatTexte = "Type d'arme/test inconnu.";
   }
 
   const date = new Date().toLocaleTimeString();
-  if ((armeType === "cac" || armeType === "distance") && touche) {
-    historique.unshift(`[${date}] ${armeNom} => Touché ! (${jetToucher}) Dégâts infligés : ${degats}`);
-  } else {
-    historique.unshift(`[${date}] ${armeNom} => ${resultatTexte} (${jetToucher})`);
-  }
+  historique.unshift(`[${date}] ${armeNom} → ${resultatTexte}`);
   if (historique.length > 10) historique.pop();
   historiqueDiv.textContent = historique.join('\n');
 
   resultatDiv.textContent = resultatTexte;
   resumeDiv.textContent = resumeTexte;
+  // 👉 Afficher le bouton copier PJ seulement s'il y a du contenu
+  showCopyButtonIfContent("copyPJBtn", "resultat", "resume");
 }
-
-
 
 // =====================================================
 // 👹 6) Attaque PNJ
-//     - CàC : d20 (1 = échec crit, 20 = crit dégâts ×2)
-//     - Distance : d6 vs CT (1 = échec)
 // =====================================================
 function attaquePNJ() {
   try {
-    const nomEl = document.getElementById("nomPNJ");
-    const ctEl = document.getElementById("ctPNJ");
-    const attaqueEl = document.getElementById("attaquePNJ");
-    const degatsEl = document.getElementById("degatsPNJ");
-    const cibleSel = document.getElementById("ciblePNJ");
-
+    const nom = document.getElementById("nomPNJ")?.value.trim() || "PNJ";
+    const ct = parseInt(document.getElementById("ctPNJ")?.value, 10) || 0;
+    const attaqueNom = document.getElementById("attaquePNJ")?.value.trim() || "Attaque";
+    const degatsExpr = document.getElementById("degatsPNJ")?.value.trim() || "1d6";
+    const cibleId = document.getElementById("ciblePNJ")?.value;
     const type = document.getElementById('attackTypePNJSelect').value;
 
-    const nom = nomEl ? (nomEl.value.trim() || "PNJ") : "PNJ";
-    const ct = ctEl ? (parseInt(ctEl.value, 10) || 0) : 0;
-    const attaqueNom = attaqueEl ? (attaqueEl.value.trim() || "Attaque") : "Attaque";
-    const degatsExpr = degatsEl ? (degatsEl.value.trim() || "1d6") : "1d6";
-    const cibleId = cibleSel ? (cibleSel.value) : null;
     const cible = cibleId ? gameData.personnages[cibleId] : null;
-
-    const cibleLabel = cible ? cible.nom : (cibleId || "Cible");
+    const cibleLabel = cible ? cible.nom : "Cible";
     const caCible = cible ? cible.ca : 0;
-
-    const typeDegats = document.getElementById("damageTypePNJSelect").value;
-    const reducPersoInput = document.getElementById("reduceDamage");
-    const reducPerso = reducPersoInput ? parseInt(reducPersoInput.value, 10) || 0 : 0;
-
-    let reducCible = 0;
-    if (cible) {
-      if (typeDegats === "physique") reducCible = cible.reducphy || 0;
-      else if (typeDegats === "magique") reducCible = cible.reducmag || 0;
-    }
 
     let jetToucher = 0;
     let touche = false;
@@ -401,99 +334,80 @@ function attaquePNJ() {
     let resumeText = "";
     let resultatText = "";
 
-    // ---------------- CàC ----------------
     if (type === "cac") {
       const jet = rollDice("1d20");
       jetToucher = jet.total;
       if (jetToucher === 1) echecCrit = true;
       if (jetToucher === 20) succesCrit = true;
-
       touche = jetToucher >= caCible;
-      resumeText += `Jet pour toucher (1d20) : ${jetToucher} = ${jetToucher}\n`;
-      resumeText += touche ? "=> Touché\n" : "=> Raté\n";
+
+      resumeText += `🎲 Jet (1d20) : ${jetToucher}\n`;
+      resumeText += touche ? "✅ Touché\n" : "❌ Raté\n";
 
       if (!touche) {
-        resultatText = echecCrit ? `💥 Échec critique : ${nom} passe son prochain tour !` : `${nom} rate son attaque (${jetToucher}).`;
+        resultatText = echecCrit ? `💀 Échec critique ! ${nom} perd son prochain tour` : `❌ ${nom} rate son attaque`;
       } else {
-        // parsing formule dégâts
         const exprClean = degatsExpr.replace(/\s+/g, "");
-        let match = exprClean.match(/^(\d+d\d+)([+-]\d+)?$/);
-        let formule = exprClean;
-        let bonusFixe = 0;
+        const match = exprClean.match(/^(\d+d\d+)([+-]\d+)?$/);
+        let formule = exprClean, bonusFixe = 0;
         if (match) {
           formule = match[1];
           bonusFixe = parseInt(match[2] || "0", 10);
         }
 
         const rollD = rollDice(formule);
-        const baseDes = rollD.total;
-        const bonusPerso = bonusFixe; 
-        let totalAvantReduc = baseDes + bonusPerso;
-        let degatsParts = [`( ${rollD.rolls.join(' + ')} )`];
-        if (bonusPerso !== 0) degatsParts.push(`+ ${bonusPerso}`);
-
         if (succesCrit) {
-          totalAvantReduc = baseDes * 2 + bonusPerso;
-          degats = totalAvantReduc - reducCible;
-          if (degats < 0) degats = 0;
-          resumeText += `💥 Dégâts critiques : (( ${rollD.rolls.join(' + ')} ) ×2 )${bonusPerso !== 0 ? ` + ${bonusPerso}` : ""} = ${baseDes * 2 + bonusPerso}\n`;
-          if (reducCible > 0) resumeText += `Réd. dégâts (${reducCible}) appliquée → ${degats}\n`;
-          resultatText = `🎯 Coup critique de ${nom} ! → ${cibleLabel} reçoit ${degats} dégâts`;
+          const totalAvantReduc = rollD.total * 2 + bonusFixe;
+          degats = Math.max(0, totalAvantReduc);
+          resumeText += `💥 Dégâts critiques : ( ${rollD.rolls.join(" + ")} ×2 ) + bonus = ${totalAvantReduc}\n`;
+          resultatText = `🎯 Coup critique ! ${cibleLabel} reçoit ${degats} dégâts`;
         } else {
-          degats = totalAvantReduc - reducCible;
-          if (degats < 0) degats = 0;
-          resumeText += `Dégâts : ${degatsParts.join(' ')} = ${totalAvantReduc}\n`;
-          if (reducCible > 0) resumeText += `Réd. dégâts (${reducCible}) appliquée → ${degats}\n`;
-          resultatText = `${nom} touche ${cibleLabel} ! (${jetToucher}) → ${degats} dégât(s)`;
+          const totalAvantReduc = rollD.total + bonusFixe;
+          degats = Math.max(0, totalAvantReduc);
+          resumeText += `⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} ) + bonus = ${totalAvantReduc}\n`;
+          resultatText = `✅ ${nom} touche ${cibleLabel} → ${degats} dégâts`;
         }
       }
 
-    // ---------------- Distance ----------------
     } else if (type === "distance") {
       const jet = rollDice("1d6");
       jetToucher = jet.total;
       touche = (jetToucher > 1) && (jetToucher >= ct);
-      resumeText += `Jet pour toucher (1d6) : ${jetToucher} = ${jetToucher}\n`;
-      resumeText += touche ? "=> Touché\n" : "=> Raté\n";
+
+      resumeText += `🎯 Jet distance (1d6) : ${jetToucher} vs CT ${ct}\n`;
+      resumeText += touche ? "✅ Touché\n" : "❌ Raté\n`;"
 
       if (!touche) {
-        resultatText = `❌ Échec (${jetToucher} < CT ${ct}).`;
+        resultatText = `❌ Échec (${jetToucher} < CT ${ct})`;
       } else {
         const rollD = rollDice(degatsExpr);
-        let baseDeg = rollD.total;
-        if (baseDeg < 1) baseDeg = 1;
-        let finalDeg = baseDeg - reducCible;
-        if (finalDeg < 0) finalDeg = 0;
-        degats = finalDeg;
-
-        resumeText += `Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${baseDeg}\n`;
-        if (reducCible > 0) resumeText += `Réd. dégâts (${reducCible}) appliquée → ${degats}\n`;
-        resultatText = `${nom} → ${cibleLabel} Touché ! (${jetToucher}) → ${degats} dégât(s) infligé(s)`;
+        degats = Math.max(0, rollD.total);
+        resumeText += `⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${rollD.total}\n`;
+        resultatText = `✅ ${nom} touche ${cibleLabel} → ${degats} dégâts`;
       }
-
-    } else {
-      resultatText = "Type d'attaque PNJ inconnu.";
     }
 
     const date = new Date().toLocaleTimeString();
-    if (touche) {
-      historique.unshift(`[${date}] ${attaqueNom} (${nom} → ${cibleLabel}) => Touché ! (${jetToucher}) Dégâts infligés : ${degats}`);
-    } else {
-      const tag = (echecCrit ? "Échec critique" : "Échec");
-      historique.unshift(`[${date}] ${attaqueNom} (${nom} → ${cibleLabel}) => ${tag} (${jetToucher})`);
-    }
+    historique.unshift(`[${date}] ${attaqueNom} (${nom} → ${cibleLabel}) → ${resultatText}`);
     if (historique.length > 10) historique.pop();
-    historiqueDiv.textContent = historique.join('\n');
+    historiqueDiv.textContent = historique.join("\n");
 
-    const out = document.getElementById('resultatPNJ');
-    if (out) out.textContent = resultatText + (resumeText ? ("\n" + resumeText) : "");
+    document.getElementById("resultatPNJ").textContent = resultatText + "\n" + resumeText;
+    // 👉 Afficher le bouton copier PNJ seulement s'il y a du contenu
+  showCopyButtonIfContent("copyPNJBtn", "resultatPNJ");
 
   } catch (err) {
-    console.error("Erreur dans attaquePNJ :", err);
-    const out = document.getElementById('resultatPNJ');
-    if (out) out.textContent = "Erreur : expression de dégâts invalide ou élément absent.";
+    document.getElementById("resultatPNJ").textContent = "❌ Erreur attaque PNJ";
   }
 }
+
+// =====================================================
+// 🚀 Initialisation boutons copier
+// =====================================================
+  addCopyButton("copyPJBtn", ["resultat", "resume"]);
+  addCopyButton("copyPNJBtn", ["resultatPNJ"]);
+
+
 
 
 
@@ -588,7 +502,6 @@ function lancerChasse() {
   const bonusApprivoiser = (chasseur && chasseur.bonusApprivoiser) || 0;
 
   let pvActuels = parseInt(document.getElementById("pvActuels").value, 10) || (chasseur ? chasseur.pv : 10);
-
   let pvPerdus = 0;
   let butin = [];
   let compagnons = [];
@@ -603,19 +516,20 @@ function lancerChasse() {
     if (!cible) {
       const dePistage = lancerDe(20);
       const jetPistage = dePistage + bonusPistage;
-      log.push(`- *Heure ${h}* : Jet de pistage ${dePistage} (+${bonusPistage} bonus) = ${jetPistage}`);
       cible = trouverAnimal(zone, jetPistage);
 
       if (!cible) {
-        log.push(`- *Heure ${h}* : Jet de pistage ${jetPistage} → Rien trouvé.`);
+        log.push(`- *Heure ${h}* : 🎲 Jet de pistage ${dePistage} (+${bonusPistage} bonus) = ${jetPistage} → Rien trouvé`);
         continue;
       }
-      log.push(`- *Heure ${h}* : Jet de pistage ${jetPistage} → ${nomChasseur} rencontre *${cible.animal}* !`);
+      
+      log.push(`- *Heure ${h}* : 🎲 Jet de pistage ${dePistage} (+${bonusPistage} bonus) = ${jetPistage} → 🎯 ${nomChasseur} rencontre *${cible.animal}* !`);
     } else {
       log.push(`- *Heure ${h}* : ${nomChasseur} continue le combat contre *${cible.animal}*.`);
     }
 
-    // --- Priorité compagnon ---
+
+    // --- Priorité compagnon / apprivoisement ---
     if (priorite === "compagnon" && cible.jets.CHA) {
       const deCha = lancerDe(20);
       const jetAction = deCha + bonusApprivoiser;
@@ -624,7 +538,7 @@ function lancerChasse() {
 
       if (jetAction >= seuil) {
         compagnons.push(cible.animal);
-        log.push(`    - Jet CHA ${texteJet} (≥ ${seuil}) → Succès ! ${cible.animal} devient un compagnon 🐾`);
+        log.push(`    - 🐾 Jet CHA ${texteJet} (≥ ${seuil}) → ✅ Succès ! ${cible.animal} devient un compagnon 🐾`);
         log.push(`⚑ La chasse s'arrête car ${nomChasseur} a trouvé un compagnon 🐾`);
         cible = null;
         stopChasse = true;
@@ -632,7 +546,7 @@ function lancerChasse() {
         const dmg = evalDegats(cible.degats);
         pvActuels -= dmg;
         pvPerdus += dmg;
-        log.push(`    - Jet CHA ${texteJet} (< ${seuil}) → Échec, ${cible.animal} riposte (-${dmg} PV, reste ${pvActuels}).`);
+        log.push(`    - 🐾 Jet CHA ${texteJet} (< ${seuil}) → ❌ Échec, ${cible.animal} riposte 💥 -${dmg} PV (reste ${pvActuels})`);
       }
     } else {
       // --- Combat normal ---
@@ -646,7 +560,6 @@ function lancerChasse() {
       if (seuil && jetAction >= seuil) {
         let lootTrouve = [];
         let lootNotes = {};
-
         cible.loot.forEach(obj => {
           const quantite = evalDegats(obj.q || obj.de || "1");
           lootTrouve.push({ q: quantite, t: obj.t });
@@ -655,44 +568,26 @@ function lancerChasse() {
         // Application des priorités
         if (priorite === "viande") {
           const viande = lootTrouve.find(l => l.t.includes("viande"));
-          if (viande) {
-            viande.q += 1;
-            lootNotes[viande.t] = "+1 bonus priorité";
-          }
+          if (viande) viande.q += 1;
           const autre = lootTrouve.find(l => !l.t.includes("viande"));
-          if (autre) {
-            autre.q = Math.max(0, autre.q - 1);
-            lootNotes[autre.t] = "-1 malus priorité";
-          }
+          if (autre) autre.q = Math.max(0, autre.q - 1);
         }
-
         if (priorite === "ressource") {
           const autre = lootTrouve.find(l => !l.t.includes("viande"));
-          if (autre) {
-            autre.q += 1;
-            lootNotes[autre.t] = "+1 bonus priorité";
-          }
+          if (autre) autre.q += 1;
           const viande = lootTrouve.find(l => l.t.includes("viande"));
-          if (viande) {
-            viande.q = Math.max(0, viande.q - 1);
-            lootNotes[viande.t] = "-1 malus priorité";
-          }
+          if (viande) viande.q = Math.max(0, viande.q - 1);
         }
 
-        const lootTextes = lootTrouve.map(l => {
-          let texte = `${l.q} ${l.t}`;
-          if (lootNotes[l.t]) texte += ` (${lootNotes[l.t]})`;
-          return texte;
-        });
-
+        const lootTextes = lootTrouve.map(l => `${l.q} ${l.t}`);
         butin.push(...lootTextes);
-        log.push(`    - Jet ${texteJet} (≥ ${seuil}) → Succès ! ${cible.animal} est vaincu et rapporte *${lootTextes.join(", ")}*.`);
+        log.push(`    - 🎲 Jet ${texteJet} (≥ ${seuil}) → ✅ Succès ! ${cible.animal} est vaincu et rapporte *${lootTextes.join(", ")}*.`);
         cible = null;
       } else {
         const dmg = evalDegats(cible.degats);
         pvActuels -= dmg;
         pvPerdus += dmg;
-        log.push(`    - Jet ${texteJet} (< ${seuil}) → Échec, ${cible.animal} riposte (-${dmg} PV, reste ${pvActuels}).`);
+        log.push(`    - 🎲 Jet ${texteJet} (< ${seuil}) → ❌ Échec, ${cible.animal} riposte 💥 -${dmg} PV (reste ${pvActuels})`);
       }
     }
 
@@ -705,7 +600,6 @@ function lancerChasse() {
     }
   }
 
-  // --- Regrouper le butin ---
   const lootCompteur = {};
   butin.forEach(item => {
     const match = item.match(/(\d+)\s+(.+)/);
@@ -718,7 +612,6 @@ function lancerChasse() {
   });
   const butinRegroupe = Object.entries(lootCompteur).map(([type, quantite]) => `${quantite} ${type}`);
 
-  // --- Affichage final ---
   document.getElementById("resultatChasse").innerHTML =
     `### Résumé de la chasse<br>` +
     log.join("<br>") + `<br><br>` +
@@ -728,20 +621,16 @@ function lancerChasse() {
     `Butin 🥩: ${butinRegroupe.join(", ") || "Aucun"}<br>` +
     (priorite === "compagnon" ? `Compagnon 🐾 : ${compagnons.join(", ") || "Aucun"}` : "");
 
+  showCopyButtonIfContent("copyChasseBtn", "resultatChasse");
+
   const historiqueDivLocal = document.getElementById("historique"); 
   if (!window.historiqueChasses) window.historiqueChasses = []; 
-
   const date = new Date().toLocaleTimeString();
   const texteBilan = `[${date}] ${nomChasseur} : PV ${pvActuels}, PV perdus ${pvPerdus}, Butin : ${butinRegroupe.join(", ") || "Aucun"}${priorite === "compagnon" ? ", Compagnons : " + (compagnons.join(", ") || "Aucun") : ""}`;
-
   window.historiqueChasses.unshift(texteBilan);
   if (window.historiqueChasses.length > 10) window.historiqueChasses.pop();
-
   historiqueDivLocal.textContent = window.historiqueChasses.join("\n---\n");
 }
-
-
-
 
 // =====================================================
 // 🧭 10) Initialisations DOMContentLoaded
@@ -818,6 +707,53 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+// =====================================================
+// 📋 Utilitaire "copier"
+// - supporte un id ou un tableau d'ids
+// - préserve *gras* et _italique_ pour WhatsApp (on copie le texte, pas le HTML)
+// =====================================================
+
+function addCopyButton(buttonId, targetIds) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+
+  const ids = Array.isArray(targetIds) ? targetIds : [targetIds];
+
+  // Initialement caché
+  btn.style.display = "none";
+
+  btn.addEventListener("click", () => {
+    let text = ids.map(id => {
+      const el = document.getElementById(id);
+      if (!el) return "";
+      return (el.innerText ?? el.textContent ?? "").trim();
+    }).filter(Boolean).join("\n\n");
+
+    if (!text) return;
+
+    navigator.clipboard.writeText(text).then(() => {
+      const label = btn.textContent;
+      btn.textContent = "✅ Copié !";
+      setTimeout(() => (btn.textContent = label), 1200);
+    });
+  });
+}
+
+// Petite aide pour afficher le bouton seulement quand il y a du contenu
+function showCopyButtonIfContent(buttonId, ...elementIds) {
+  const btn = document.getElementById(buttonId);
+  if (!btn) return;
+  const hasContent = elementIds.some(id => {
+    const el = document.getElementById(id);
+    return el && (el.innerText ?? el.textContent ?? "").trim().length > 0;
+  });
+  btn.style.display = hasContent ? "inline-block" : "none";
+}
+
+// --- Initialisation minimale
+addCopyButton("copyPJBtn", ["resultat", "resume"]);
+addCopyButton("copyPNJBtn", ["resultatPNJ"]);
+addCopyButton("copyChasseBtn", ["resultatChasse"]);
 
   // === GESTION DES ONGLETS ===
   const tabButtons = document.querySelectorAll('.tab-button');

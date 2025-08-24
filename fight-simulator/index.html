@@ -74,6 +74,8 @@
 
         <div id="resultat"></div>
         <div id="resume"></div>
+        <button id="copyPJBtn" style="display:none;">📋 Copier</button>
+
       </div>
     </div>
 
@@ -117,6 +119,7 @@
         <button onclick="attaquePNJ()">Lancer l'attaque</button>
 
         <div id="resultatPNJ"></div>
+        <button id="copyPNJBtn" style="display:none;">📋 Copier</button>
       </div>
     </div>
 
@@ -167,14 +170,18 @@
     <label>Bonus Chasse :</label>
     <input type="number" id="bonusChasse" value="0">
 
-<!--     <label>Bonus Loot :</label>
+    <label>Bonus Apprivoiser :</label>
+    <input type="number" id="bonusApprivoiser" value="0">
+
+    <label>Bonus Loot :</label>
     <input type="number" id="bonusLoot" value="0">
- -->
+
     <button onclick="lancerChasse()">Lancer la chasse</button>
 
     <div id="resultatChasse" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;">
     Résultats de la chasse ici...
     </div>
+    <button id="copyChasseBtn" style="display:none;">📋 Copier</button>
   </div>  
 </div>
 
