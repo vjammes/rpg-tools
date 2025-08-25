@@ -28,6 +28,7 @@
       <button class="tab-button active" data-tab="perso">🎲 </br>Personnages</button>
       <button class="tab-button" data-tab="ennemi">👹 </br>Ennemis</button>
       <button class="tab-button" data-tab="chasse">🏹 </br>Chasse</button>
+      <button class="tab-button" data-tab="crochetage">🔑 </br>Crochetage</button>
     </div>
 
     <!-- Onglet Personnages -->
@@ -186,9 +187,46 @@
     Résultats de la chasse ici...
     </div>
     <button id="copyChasseBtn" style="display:none;">📋 Copier</button>
-  </div>  
+  </div> 
+
+
+
+
 </div>
 
+    <!-- Onglet Crochetage -->
+  <div id="tab-crochetage" class="tab-content">
+    <div class="card">
+      <h2>Crochetage</h2>
+
+      <label for="outilCrochetage">Matériel :</label>
+      <select id="outilCrochetage" onchange="document.getElementById('durabiliteCrochetage').value = outilsCrochetage[this.value].durabilite;">
+        <option value="1">Niveau 1 - Rudimentaire</option>
+        <option value="2">Niveau 2 - Standard</option>
+        <option value="3">Niveau 3 - Avancé</option>
+        <option value="4">Niveau 4 - Maître</option>
+      </select><br>
+
+      <label for="durabiliteCrochetage">Durabilité :</label>
+      <input type="number" id="durabiliteCrochetage" value="5" min="0"><br>
+
+      <label for="serrureCrochetage">Serrure :</label>
+      <select id="serrureCrochetage">
+        <option value="10">Facile (DD 10)</option>
+        <option value="15">Modérée (DD 15)</option>
+        <option value="20">Difficile (DD 20)</option>
+        <option value="25">Très difficile (DD 25)</option>
+      </select><br><br>
+
+      <button onclick="lancerCrochetage()">🎲 Tenter le crochetage</button>
+
+      <div id="resultatCrochetage" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;">
+        Résultats du crochetage ici...
+      </div>
+
+      <button id="copyCrochetageBtn" style="display:none;">📋 Copier</button>
+    </div>
+  </div>
 
     <!-- Historique partagé -->
     <h3 id="historicTitle">Historique des lancers</h3>

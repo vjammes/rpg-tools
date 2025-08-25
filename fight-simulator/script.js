@@ -812,7 +812,92 @@ function lancerChasse() {
   historiqueDivLocal.textContent = window.historiqueChasses.join("\n---\n");
 }
 
+// =====================================================
+// 🔓 7) Données Crochetage
+// =====================================================
+const outilsCrochetage = {
+  1: { nom:"Rudimentaire", acces:[10], bonus:{10:0}, durabilite:5 },
+  2: { nom:"Standard", acces:[10,15], bonus:{10:1}, durabilite:10 },
+  3: { nom:"Avancé", acces:[10,15,20], bonus:{10:2,15:1}, durabilite:15 },
+  4: { nom:"Maître", acces:[10,15,20,25], bonus:{10:3,15:2,20:1}, durabilite:20 },
+};
 
+const serrures = {
+  10: "Facile (DD 10)",
+  15: "Modérée (DD 15)",
+  20: "Difficile (DD 20)",
+  25: "Très difficile (DD 25)"
+};
+
+// =====================================================
+// 🎲 8) Lancer Crochetage
+// =====================================================
+
+function lancerCrochetage() {
+  const outilLevel = parseInt(document.getElementById("outilCrochetage").value, 10);
+  const serrureDD = parseInt(document.getElementById("serrureCrochetage").value, 10);
+  const outilData = outilsCrochetage[outilLevel];
+
+  const resultatDiv = document.getElementById("resultatCrochetage");
+  const historiqueDiv = document.getElementById("historique");
+  const inputDurabilite = document.getElementById("durabiliteCrochetage");
+
+  let durabilite = parseInt(inputDurabilite.value, 10);
+
+  // Vérifie si l’outil peut tenter cette serrure
+  if (!(serrureDD in outilData.bonus)) {
+    resultatDiv.textContent = `❌ Votre ${outilData.nom} ne peut pas crocheter cette serrure (DD ${serrureDD}).`;
+    return;
+  }
+
+  // Lancer du dé
+  let jet = rollDice("1d20");
+  jet = (typeof jet === "object" && "total" in jet) ? jet.total : Number(jet); 
+  const bonus = outilData.bonus[serrureDD] || 0;
+  const total = jet + bonus;
+  const succes = total >= serrureDD;
+  let log = `🎲 Jet: ${jet}${bonus ? ` (+${bonus})` : ""} = ${total}\n` +
+            `DD: ${serrureDD}\n` +
+            (succes ? "✅ Réussite !" : "❌ Échec...");
+
+  // Durabilité
+  if (succes) {
+    durabilite = Math.max(0, durabilite - 1);
+    log += `\nL’outil perd 1 point de durabilité.`;
+  } else {
+    const perte = Math.floor(Math.random() * 3) + 1; // 1d3
+    if (perte === 1) {
+      durabilite = 0;
+      log += `\n⚡ L’outil est brisé !`;
+    } else {
+      const perteDur = perte === 2 ? 2 : 3;
+      durabilite = Math.max(0, durabilite - perteDur);
+      log += `\nL’outil perd ${perteDur} points de durabilité.`;
+    }
+  }
+
+  inputDurabilite.value = durabilite;
+
+  // 👉 Affiche le résultat courant
+  resultatDiv.textContent = log;
+
+  // Historique condensé en une ligne
+  if (!window.historiqueCrochetage) window.historiqueCrochetage = [];
+  const date = new Date().toLocaleTimeString();
+  const logSynth = `${date} | Outil: ${outilData.nom} | Jet: ${total} (d20 ${jet}${bonus ? `+${bonus}` : ""}) | DD: ${serrureDD} | Résultat: ${succes ? "Réussite" : "Échec"} | Durabilité: ${durabilite}`;
+  window.historiqueCrochetage.unshift(logSynth);
+  if (window.historiqueCrochetage.length > 10) window.historiqueCrochetage.pop();
+  historiqueDiv.textContent = window.historiqueCrochetage.join("\n");
+
+
+  // 👉 Active le bouton copier
+  document.getElementById("copyCrochetageBtn").style.display = "inline-block";
+}
+
+// 👉 Bouton "Copier" → copie seulement le résultat courant
+document.getElementById("copyCrochetageBtn").addEventListener("click", () => {
+  const texte = document.getElementById("resultatCrochetage").textContent;
+});
 
 // =====================================================
 // 🧭 10) Initialisations DOMContentLoaded
@@ -936,6 +1021,7 @@ function showCopyButtonIfContent(buttonId, ...elementIds) {
 addCopyButton("copyPJBtn", ["resultat", "resume"]);
 addCopyButton("copyPNJBtn", ["resultatPNJ"]);
 addCopyButton("copyChasseBtn", ["resultatChasse"]);
+addCopyButton("copyCrochetageBtn", ["resultatCrochetage"]);
 
   // === GESTION DES ONGLETS ===
   const tabButtons = document.querySelectorAll('.tab-button');
