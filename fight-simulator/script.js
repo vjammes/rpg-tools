@@ -1096,5 +1096,12 @@ selectsPerso.forEach(select => {
 // Affichage initial au chargement
 document.addEventListener("DOMContentLoaded", afficherStats);
 
+// Charger crochetage
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("btnCrochetage");
+  if (btn) btn.addEventListener("click", lancerCrochetage);
+});
+
+
 
 
