@@ -400,7 +400,7 @@ function attaquePerso() {
         } else {
           const totalAvantReduc = baseDes + bonusFixe;
           degats = Math.max(0, totalAvantReduc - reducCible);
-          resumeTexte += `\r ⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
+          resumeTexte += `⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
           if (bonusFixe) resumeTexte += ` + ${bonusFixe} (bonus)`;
           resumeTexte += ` = ${totalAvantReduc}\n`;
         }
@@ -425,7 +425,7 @@ function attaquePerso() {
         const bonusFixe = (perso.bonusDegatsDist || 0) + bonusContext;
         const totalAvantReduc = baseDes + bonusFixe;
         degats = Math.max(0, totalAvantReduc - reducCible);
-        resumeTexte += `\r ⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
+        resumeTexte += `⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
         if (bonusFixe) resumeTexte += ` + ${bonusFixe} (bonus)`;
         resumeTexte += ` = ${totalAvantReduc}\n`;
         if (reducCible) resumeTexte += `🔻 Réduction (${reducCible}) → ${degats}\n`;
@@ -544,7 +544,7 @@ function attaquePNJ() {
         } else {
           const totalAvantReduc = rollD.total + bonusFixe;
           degats = Math.max(0, totalAvantReduc - reduc);
-          resumeText += `\r ⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} )`;
+          resumeText += `⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} )`;
           if (bonusFixe > 0) resumeText += ` + ${bonusFixe} (bonus)`;
           resumeText += ` = ${totalAvantReduc}\n`;
         }
@@ -566,7 +566,7 @@ function attaquePNJ() {
         const rollD = rollDice(degatsExpr);
         const totalAvantReduc = rollD.total;
         degats = Math.max(0, totalAvantReduc - reduc);
-        resumeText += `\r ⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${totalAvantReduc}\n`;
+        resumeText += `⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${totalAvantReduc}\n`;
         if (reduc > 0) resumeText += `🔻 Réduction (${reduc}) → ${degats}\n`;
         resultatText = `✅ ${nom} touche ${cibleLabel} → ${degats} dégâts`;
       }
@@ -825,10 +825,10 @@ function lancerChasse() {
 // 🔓 15) Données Crochetage
 // =====================================================
 const outilsCrochetage = {
-  1: { nom:"Rudimentaire", acces:[10], bonus:{10:0}, durabilite:5 },
-  2: { nom:"Standard", acces:[10,15], bonus:{10:1}, durabilite:10 },
-  3: { nom:"Avancé", acces:[10,15,20], bonus:{10:2,15:1}, durabilite:15 },
-  4: { nom:"Maître", acces:[10,15,20,25], bonus:{10:3,15:2,20:1}, durabilite:20 },
+  1: { nom:"matériel rudimentaire", acces:[10], bonus:{10:0}, durabilite:5 },
+  2: { nom:"matériel standard", acces:[10,15], bonus:{10:1}, durabilite:10 },
+  3: { nom:"matériel avancé", acces:[10,15,20], bonus:{10:2,15:1}, durabilite:15 },
+  4: { nom:"matériel du maître", acces:[10,15,20,25], bonus:{10:3,15:2,20:1}, durabilite:20 },
 };
 
 const serrures = {
@@ -872,7 +872,7 @@ function lancerCrochetage() {
   // Durabilité
   if (succes) {
     durabilite = Math.max(0, durabilite - 1);
-    log += `\nL’outil perd 1 point de durabilité.`;
+    log += `\nL’outil perd 1 point de durabilité. (durabilité restante : ${durabilite})`;
   } else {
     const perte = Math.floor(Math.random() * 3) + 1; // 1d3
     if (perte === 1) {
@@ -881,7 +881,7 @@ function lancerCrochetage() {
     } else {
       const perteDur = perte === 2 ? 2 : 3;
       durabilite = Math.max(0, durabilite - perteDur);
-      log += `\nL’outil perd ${perteDur} points de durabilité.`;
+      log += `\nL’outil perd ${perteDur} points de durabilité. (durabilité restante : ${durabilite})`;
     }
   }
 
