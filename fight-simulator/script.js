@@ -2,6 +2,7 @@
 // 📦 1) Données globales
 // =====================================================
 // Données de base (seulement les stats brutes et infos fixes)
+
 const gameData = {
   personnages: {
     brakmar: {
@@ -77,7 +78,9 @@ if (persoSelect) {
 
 
 // =====================================================
-// 📝 Mise à jour dynamique des options Tests (Force, Agi, etc.)
+// 📦 2) 📝 Mise à jour dynamique des options Tests (Force, Agi, etc.)
+// =====================================================
+
 function updateTestOptions(persoId) {
   const perso = gameData.personnages[persoId];
   if (!perso) return;
@@ -88,25 +91,9 @@ function updateTestOptions(persoId) {
 
   testGroup.innerHTML = ""; // vide avant reconstruction
 
-  const statLabels = {
-    for: "Force",
-    agi: "Agilité",
-    int: "Intelligence",
-    end: "Endurance",
-    cha: "Charisme"
-  };
-
-  const bonusMapping = {
-    for: "bonusJetFor",
-    agi: "bonusJetAgi",
-    int: "bonusJetInt",
-    end: "bonusJetEnd",
-    cha: "bonusJetCha"
-  };
-
-  ["for","agi","int","end","cha"].forEach(stat => {
+  ["for","agi","int","end","cha","pv"].forEach(stat => {
     const opt = document.createElement("option");
-    opt.value = "1d20";
+    opt.value = (stat === "pv") ? "1d6" : "1d20";
     opt.dataset.type = "test";
     opt.dataset.stat = stat;
     const bonus = perso[bonusMapping[stat]] || 0;
@@ -124,9 +111,10 @@ if (persoSelectEl) {
 
 
 // ============================================
-// 🔗 2) Raccourcis DOM
+// 🔗 3) Raccourcis DOM
 // ============================================
 // Récupérer tous les sélecteurs qui influencent l'affichage de la sidebar
+
 const selectsPerso = [
   document.getElementById('personnage'),   // Onglet Personnage
   document.getElementById('ciblePNJ'),     // Onglet Ennemi
@@ -143,8 +131,9 @@ const resumeDiv = document.getElementById('resume');
 let historique = [];
 
 // =====================================================
-// 🧾 3) Affichage des stats
+// 🧾 4) Affichage des stats
 // =====================================================
+
 function afficherStats() {
   const statsDiv = document.getElementById('statsPerso');
 
@@ -208,8 +197,9 @@ selectsPerso.forEach(sel => {
 });
 
 // =====================================================
-// 🎲 4) Utilitaires de dés 
+// 🎲 5) Utilitaires de dés 
 // =====================================================
+
 function rollDice(expr) {
   expr = expr.replace(/\s+/g, ''); // supprime les espaces
 
@@ -248,7 +238,7 @@ function rollDice(expr) {
 }
 
 // =====================================================
-// 📌 Utilitaire : bouton copier
+// 📌 6) Utilitaire : bouton copier
 // =====================================================
 function addCopyButton(buttonId, targetId) {
   const btn = document.getElementById(buttonId);
@@ -268,7 +258,7 @@ function addCopyButton(buttonId, targetId) {
 }
 
 // =====================================================
-// 📦 Mise à jour dynamique des tests
+// 📦 7) Mise à jour dynamique des tests
 // =====================================================
 function updateTestOptions(persoId) {
   const perso = gameData.personnages[persoId];
@@ -278,8 +268,16 @@ function updateTestOptions(persoId) {
   const testGroup = select.querySelector('optgroup[label="Tests"]');
   if (!testGroup) return;
 
+  // Conserve les options existantes
+  const existingOptions = Array.from(testGroup.querySelectorAll('option[data-type="test"]'));
+  // On garde uniquement celles qui ne sont PAS des tests de stats classiques
+  const existingNonStatOptions = existingOptions.filter(opt =>
+  !(opt.value === "1d20" && ['for','agi','int','end','cha'].includes(opt.dataset.stat))
+  );
+
   testGroup.innerHTML = ""; // vide avant reconstruction
 
+  // Ajoute les options de stats (1d20)
   const stats = ['for','agi','int','end','cha'];
   stats.forEach(stat => {
     const bonus = perso[stat] || 0;
@@ -291,10 +289,20 @@ function updateTestOptions(persoId) {
     opt.textContent = label;
     testGroup.appendChild(opt);
   });
+
+  // Réajoute les options non-stats (comme "PV résurrection", "Combattre la mort", etc.)
+  existingNonStatOptions.forEach(opt => {
+    const newOpt = document.createElement('option');
+    newOpt.value = opt.value; // valeur d'origine (1d6, 1d20, etc.)
+    newOpt.dataset.type = opt.dataset.type;
+    newOpt.dataset.stat = opt.dataset.stat;
+    newOpt.textContent = opt.textContent; // libellé d'origine
+    testGroup.appendChild(newOpt);
+  });
 }
 
 // =====================================================
-// ⚔️ Attaque Personnage (PJ)
+// ⚔️ 8) Attaque Personnage (PJ)
 // =====================================================
 
 function attaquePerso() {
@@ -392,7 +400,7 @@ function attaquePerso() {
         } else {
           const totalAvantReduc = baseDes + bonusFixe;
           degats = Math.max(0, totalAvantReduc - reducCible);
-          resumeTexte += `⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
+          resumeTexte += `\r ⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
           if (bonusFixe) resumeTexte += ` + ${bonusFixe} (bonus)`;
           resumeTexte += ` = ${totalAvantReduc}\n`;
         }
@@ -408,7 +416,7 @@ function attaquePerso() {
       const jetToucherObj = rollDice("1d6");
       jetToucher = jetToucherObj.total;
       touche = jetToucher >= seuil;
-      resumeTexte += `🎯 Jet distance (1d6) : ${jetToucher} vs seuil ${seuil}\n`;
+      resumeTexte += `🎯 Jet distance (1d6) : ${jetToucher} pour un objectif à ${seuil}\n`;
       resumeTexte += touche ? "✅ Touché\n" : "❌ Raté\n";
 
       if (touche) {
@@ -417,7 +425,7 @@ function attaquePerso() {
         const bonusFixe = (perso.bonusDegatsDist || 0) + bonusContext;
         const totalAvantReduc = baseDes + bonusFixe;
         degats = Math.max(0, totalAvantReduc - reducCible);
-        resumeTexte += `⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
+        resumeTexte += `\r ⚔️ Dégâts : ( ${degatsRollObj.rolls.join(" + ")} )`;
         if (bonusFixe) resumeTexte += ` + ${bonusFixe} (bonus)`;
         resumeTexte += ` = ${totalAvantReduc}\n`;
         if (reducCible) resumeTexte += `🔻 Réduction (${reducCible}) → ${degats}\n`;
@@ -428,16 +436,20 @@ function attaquePerso() {
 
     // === Test stat ===
     } else if (armeType === "test") {
-      const jetObj = rollDice("1d20");
+      const jetObj = rollDice(armeValeur);
       jetToucher = jetObj.total;
       const total = jetToucher + statBonus + bonusContext;
+      const reussi = total >= seuil;
 
-      resumeTexte += `🎲 Jet (1d20) : ${jetToucher}`;
+      resumeTexte += `🎲 Jet (${armeValeur}) : ${jetToucher}`;
       if (statBonus) resumeTexte += ` + ${statBonus} (bonus stat)`;
       if (bonusContext) resumeTexte += ` + ${bonusContext} (bonus contexte)`;
-      resumeTexte += ` = ${total}\n`;
+      resumeTexte += ` = ${total} pour un objectif à ${seuil}\n`;
+      // resumeTexte += reussi ? "✅ Réussi\n" : "❌ Échec\n";
 
-      resultatTexte = `🎯 Test → total = ${total}`;
+      resultatTexte = reussi
+        ? `✅ Test réussi ! (${total} ≥ ${seuil})`
+        : `❌ Test raté ... (${total} < ${seuil})`;
     }
 
     const date = new Date().toLocaleTimeString();
@@ -461,7 +473,7 @@ function attaquePerso() {
 
 
 // =====================================================
-// 👆 Initialisation du sélecteur personnage pour tests
+// 👆 9) Initialisation du sélecteur personnage pour tests
 // =====================================================
 // const persoSelectEl = document.getElementById('personnage');
 if (persoSelectEl) {
@@ -472,7 +484,7 @@ if (persoSelectEl) {
 
 
 // =====================================================
-// 👹 6) Attaque PNJ
+// 👹 10) Attaque PNJ
 // =====================================================
 
 function attaquePNJ() {
@@ -532,7 +544,7 @@ function attaquePNJ() {
         } else {
           const totalAvantReduc = rollD.total + bonusFixe;
           degats = Math.max(0, totalAvantReduc - reduc);
-          resumeText += `⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} )`;
+          resumeText += `\r ⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} )`;
           if (bonusFixe > 0) resumeText += ` + ${bonusFixe} (bonus)`;
           resumeText += ` = ${totalAvantReduc}\n`;
         }
@@ -554,7 +566,7 @@ function attaquePNJ() {
         const rollD = rollDice(degatsExpr);
         const totalAvantReduc = rollD.total;
         degats = Math.max(0, totalAvantReduc - reduc);
-        resumeText += `⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${totalAvantReduc}\n`;
+        resumeText += `\r ⚔️ Dégâts : ( ${rollD.rolls.join(" + ")} ) = ${totalAvantReduc}\n`;
         if (reduc > 0) resumeText += `🔻 Réduction (${reduc}) → ${degats}\n`;
         resultatText = `✅ ${nom} touche ${cibleLabel} → ${degats} dégâts`;
       }
@@ -573,18 +585,15 @@ function attaquePNJ() {
   }
 }
 
-
-
-
 // =====================================================
-// 🚀 Initialisation boutons copier
+// 🚀 11) Initialisation boutons copier
 // =====================================================
   addCopyButton("copyPJBtn", ["resultat", "resume"]);
   addCopyButton("copyPNJBtn", ["resultatPNJ"]);
 
 
 // =====================================================
-// 🐾 7) Données Chasse 
+// 🐾 12) Données Chasse 
 // =====================================================
 const chasseData = {
   ville: [
@@ -619,7 +628,7 @@ const chasseData = {
   ]
 };
 // =====================================================
-// 🎲 8) Utilitaires chasse
+// 🎲 13) Utilitaires chasse
 // =====================================================
 function lancerDe(faces) {
   return Math.floor(Math.random() * faces) + 1;
@@ -655,7 +664,7 @@ function trouverAnimal(zone, jetPistage) {
 }
 
 // =====================================================
-// 🏹 9) Lancer la chasse
+// 🏹 14) Lancer la chasse
 // =====================================================
 
 function lancerChasse() {
@@ -813,7 +822,7 @@ function lancerChasse() {
 }
 
 // =====================================================
-// 🔓 7) Données Crochetage
+// 🔓 15) Données Crochetage
 // =====================================================
 const outilsCrochetage = {
   1: { nom:"Rudimentaire", acces:[10], bonus:{10:0}, durabilite:5 },
@@ -830,7 +839,7 @@ const serrures = {
 };
 
 // =====================================================
-// 🎲 8) Lancer Crochetage
+// 🎲 16) Lancer Crochetage
 // =====================================================
 
 function lancerCrochetage() {
@@ -900,8 +909,7 @@ document.getElementById("copyCrochetageBtn").addEventListener("click", () => {
 });
 
 // =====================================================
-// 🧭 10) Initialisations DOMContentLoaded
-//      (updateTestLabels, menu, onglets, CT distance…)
+// 🧭 17) Initialisations DOMContentLoaded (updateTestLabels, menu, onglets, CT distance…)
 // =====================================================
 document.addEventListener("DOMContentLoaded", function () {
   // === updateTestLabels ===
@@ -914,7 +922,9 @@ document.addEventListener("DOMContentLoaded", function () {
       agi: "Agilité",
       int: "Intelligence",
       end: "Endurance",
-      cha: "Charisme"
+      cha: "Charisme",
+      pv: "PV résurrection",
+      death: "Combattre la mort"
     };
 
     const bonusMapping = {
@@ -922,7 +932,8 @@ document.addEventListener("DOMContentLoaded", function () {
       agi: "bonusJetAgi",
       int: "bonusJetInt",
       end: "bonusJetEnd",
-      cha: "bonusJetCha"
+      cha: "bonusJetCha",
+      pv: "bonusJetEnd"
     };
 
     for (const option of armeSelect.querySelectorAll("option[data-type='test']")) {
@@ -975,7 +986,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 // =====================================================
-// 📋 Utilitaire "copier"
+// 📋 18) Utilitaire "copier"
 // - supporte un id ou un tableau d'ids
 // - préserve *gras* et _italique_ pour WhatsApp (on copie le texte, pas le HTML)
 // =====================================================
