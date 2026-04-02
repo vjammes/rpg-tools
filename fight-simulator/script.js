@@ -1275,18 +1275,57 @@ addCopyButton("copyCrochetageBtn", ["resultatCrochetage"]);
     if (initial) initial.style.display = '';
   }
 
-// (Duplicata d’onglets
-const tabs = document.querySelectorAll('.tab-button');
-const contents = document.querySelectorAll('.tab-content');
+  // === SELECT MOBILE (dropdown onglets) ===
+  const tabSelect = document.getElementById("tabSelect");
 
-tabs.forEach((tab, idx) => {
-  tab.addEventListener('click', () => {
-    tabs.forEach(t => t.classList.remove('active'));
-    contents.forEach(c => c.classList.remove('active'));
-    tab.classList.add('active');
-    contents[idx].classList.add('active');
+  if (tabSelect) {
+    tabSelect.addEventListener("change", function () {
+      const value = this.value;
+
+      // Reset contenus
+      tabContents.forEach(c => {
+        c.classList.remove("active");
+        c.style.display = "none";
+      });
+
+      // Affiche le bon
+      const target = document.getElementById("tab-" + value);
+      if (target) {
+        target.classList.add("active");
+        target.style.display = "";
+      }
+
+      // Sync boutons desktop
+      tabButtons.forEach(btn => {
+        btn.classList.remove("active");
+        if (btn.dataset.tab === value) {
+          btn.classList.add("active");
+        }
+      });
+    });
+  }
+
+  // === Synchronisation boutons → select ===
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      if (tabSelect) {
+        tabSelect.value = this.dataset.tab;
+      }
+    });
   });
-});
+
+// // (Duplicata d’onglets
+// const tabs = document.querySelectorAll('.tab-button');
+// const contents = document.querySelectorAll('.tab-content');
+
+// tabs.forEach((tab, idx) => {
+//   tab.addEventListener('click', () => {
+//     tabs.forEach(t => t.classList.remove('active'));
+//     contents.forEach(c => c.classList.remove('active'));
+//     tab.classList.add('active');
+//     contents[idx].classList.add('active');
+//   });
+// });
 
 
   // === GESTION DES BONUS CHASSE ===

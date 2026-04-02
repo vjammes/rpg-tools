@@ -390,3 +390,20 @@ button:hover {
   }
 }
 
+/* Caché sur desktop */
+.tab-select {
+  display: none;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .tabs {
+    display: none; /* on cache les boutons */
+  }
+
+  .tab-select {
+    display: block; /* on affiche le select */
+  }
+}
