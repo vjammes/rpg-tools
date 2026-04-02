@@ -19,6 +19,12 @@ const gameData = {
       pv: 26,
       pistage: 0,
       chasse: 0,
+      armurier:0,
+      forgemage:0,
+      cuisinier:0,
+      alchimiste:0,
+      bucheron:0,
+      mineur:0
     },
     draner: {
       nom: "Drânër",
@@ -33,7 +39,13 @@ const gameData = {
       reducmag: 0,
       pv: 16,
       pistage: 0,
-      chasse: 0
+      chasse: 0,
+      armurier:0,
+      forgemage:0,
+      cuisinier:0,
+      alchimiste:0,
+      bucheron:0,
+      mineur:0
     }
   }
 };
@@ -177,6 +189,16 @@ function afficherStats() {
         <tr><th>Réduction des dégâts physiques</th><td>${perso.reducphy}</td></tr>
         <tr><th>Réduction des dégâts magiques</th><td>${perso.reducmag}</td></tr>
         <tr><th>PV max</th><td>${perso.pv}</td></tr>
+      </table>
+
+      <div class="table-wrapper">
+      <table>
+        <tr><th>Armurier</th><td>${perso.armurier}</td></tr>
+        <tr><th>Forgemage</th><td>${perso.forgemage}</td></tr>
+        <tr><th>Cuisinier</th><td>${perso.cuisinier}</td></tr>
+        <tr><th>Alchimiste</th><td>${perso.alchimiste}</td></tr>
+        <tr><th>Bûcheron</th><td>${perso.bucheron}</td></tr>
+        <tr><th>Mineur</th><td>${perso.mineur}</td></tr>
       </table>
     </div>
   `;
@@ -907,6 +929,192 @@ function lancerCrochetage() {
 document.getElementById("copyCrochetageBtn").addEventListener("click", () => {
   const texte = document.getElementById("resultatCrochetage").textContent;
 });
+
+// =====================================================
+// 🛠️ CRAFT AVANCÉ (PRODUCTION MULTIPLE + CRITIQUES)
+// =====================================================
+
+function lancerCraft() {
+  const nom = document.getElementById("nomObjet").value || "Objet inconnu";
+  const type = document.getElementById("typeCraft").value;
+  const niveauMetier = parseInt(document.getElementById("niveauMetier").value);
+  let tentativesRestantes = parseInt(document.getElementById("quantiteCraft").value);
+  const ingredients = parseInt(document.getElementById("nbIngredients").value);
+  const bonusOutil = parseInt(document.getElementById("outilCraft").value);
+  const assistant = document.getElementById("assistantCraft").value;
+
+  const resultatDiv = document.getElementById("resultatCraft");
+  const historiqueDiv = document.getElementById("historique");
+  const inputDurabilite = document.getElementById("durabiliteCraft");
+
+  let durabilite = parseInt(inputDurabilite.value);
+
+  // 🎯 DIFFICULTÉ
+  let diff = ingredients - niveauMetier;
+  let seuil = 10;
+
+  if (diff <= -2) seuil = 5;
+  else if (diff >= 2) seuil = 15;
+
+  let totalXP = 0;
+  let succesCount = 0;
+  let echecCount = 0;
+  let critSuccess = 0;
+  let critFail = 0;
+  let ressourcesPerdues = 0;
+  let potionsCreees = 0;
+  let craftsEffectues = 0;
+
+  while (tentativesRestantes > 0 && durabilite > 0) {
+
+    craftsEffectues++;
+    tentativesRestantes--; // on consomme une tentative
+
+    let jet = rollDice("1d20").total;
+
+    let bonusAssistant = (assistant === "maitre") ? 2 : 0;
+    let bonusMetier = (seuil === 15) ? 0 : niveauMetier;
+
+    let total = jet + bonusMetier + bonusOutil + bonusAssistant;
+    let succes = total >= seuil;
+
+    let critique = null;
+
+    if (jet === 1) {
+      succes = false;
+      critique = "fail";
+      critFail++;
+    }
+
+    if (jet === 20) {
+      succes = true;
+      critique = "success";
+      critSuccess++;
+    }
+
+    let xp = 0;
+    let perteRessources = 0;
+    let perteDurabilite = 0;
+
+    // ✅ SUCCÈS
+    if (succes) {
+      succesCount++;
+      potionsCreees++;
+
+      // ❌ PAS D'XP SI TROP FACILE
+      if (!(diff <= -2)) {
+        xp = ingredients * 10;
+
+        if (assistant === "maitre") xp = Math.floor(xp * 1.3);
+        if (critique === "success") xp *= 2;
+      }
+
+      perteDurabilite = ingredients;
+
+    } else {
+      // ❌ ÉCHEC
+      echecCount++;
+
+      perteRessources = (assistant === "none")
+        ? ingredients
+        : Math.ceil(ingredients / 2);
+
+      if (critique === "fail") {
+        perteRessources = ingredients;
+        perteDurabilite = ingredients * 4;
+      } else {
+        perteDurabilite = ingredients * 2;
+      }
+
+      // XP échec maître
+      if (assistant === "maitre" && seuil !== 5) {
+        xp = Math.floor((ingredients * 10) * 0.5);
+      }
+
+      // 🔥 IMPACT SUR LES TENTATIVES
+      let craftsPerdus = Math.floor(perteRessources / ingredients);
+      tentativesRestantes -= craftsPerdus;
+
+      ressourcesPerdues += perteRessources;
+    }
+
+    totalXP += xp;
+
+    // 🔧 DURABILITÉ
+    durabilite = Math.max(0, durabilite - perteDurabilite);
+
+    // 🛑 sécurité
+    if (tentativesRestantes < 0) tentativesRestantes = 0;
+  }
+
+  inputDurabilite.value = durabilite;
+
+  // 🎭 Narration
+  let narration = "";
+
+  if (durabilite === 0) {
+    narration = "Votre outil se brise sous la pression du travail...";
+  } else if (critFail > 0) {
+    narration = "Plusieurs erreurs critiques ralentissent la production.";
+  } else if (critSuccess > 0) {
+    narration = "Certains gestes atteignent une perfection remarquable.";
+  } else if (succesCount > echecCount) {
+    narration = "La production est efficace.";
+  } else {
+    narration = "Le rendement est médiocre.";
+  }
+
+  // 🧾 LOG FINAL
+  let log = `🛠️ Production : ${nom}\n`;
+  log += `Type : ${type}\n`;
+  log += `🧪 Ingrédients : ${ingredients} | Niveau métier : ${niveauMetier}\n`;
+  log += `🎯 Seuil : ${seuil}\n\n`;
+
+  log += `📖 ${narration}\n\n`;
+
+  log += `📊 Crafts réalisés : ${craftsEffectues}\n`;
+  log += `🧪 Objets créés : ${potionsCreees}\n\n`;
+
+  log += `✅ Réussites : ${succesCount}\n`;
+  log += `❌ Échecs : ${echecCount}\n`;
+  log += `✨ Critiques : ${critSuccess}\n`;
+  log += `💥 Échecs critiques : ${critFail}\n\n`;
+
+  log += `📦 Ressources perdues : ${ressourcesPerdues}\n`;
+  log += `⭐ XP totale : ${totalXP}\n`;
+  log += `🔧 Durabilité restante : ${durabilite}`;
+
+  resultatDiv.textContent = log;
+
+  // 📜 Historique
+  if (!window.historiqueGlobal) window.historiqueGlobal = [];
+
+  const date = new Date().toLocaleTimeString();
+  const synth = `${date} | ${nom} | ${potionsCreees} créés | XP:${totalXP}`;
+
+  window.historiqueGlobal.unshift(synth);
+  if (window.historiqueGlobal.length > 20) window.historiqueGlobal.pop();
+
+  historiqueDiv.textContent = window.historiqueGlobal.join("\n");
+
+  document.getElementById("copyCraftBtn").style.display = "inline-block";
+}
+
+// =====================================================
+// 📋 Copier résultat Craft
+// =====================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("copyCraftBtn");
+
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const texte = document.getElementById("resultatCraft").textContent;
+      navigator.clipboard.writeText(texte);
+    });
+  }
+});
+
+
 
 // =====================================================
 // 🧭 17) Initialisations DOMContentLoaded (updateTestLabels, menu, onglets, CT distance…)

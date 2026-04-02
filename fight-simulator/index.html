@@ -29,6 +29,7 @@
       <button class="tab-button" data-tab="ennemi">👹 </br>Ennemis</button>
       <button class="tab-button" data-tab="chasse">🏹 </br>Chasse</button>
       <button class="tab-button" data-tab="crochetage">🔑 </br>Crochetage</button>
+      <button class="tab-button" data-tab="craft">🛠️ </br>Métier</button>
     </div>
 
     <!-- Onglet Personnages -->
@@ -194,10 +195,6 @@
     </div>
     <button id="copyChasseBtn" style="display:none;">📋 Copier</button>
   </div> 
-
-
-
-
 </div>
 
     <!-- Onglet Crochetage -->
@@ -233,6 +230,57 @@
       <button id="copyCrochetageBtn" style="display:none;">📋 Copier</button>
     </div>
   </div>
+
+  <!-- Onglet Métiers -->
+  <div id="tab-craft" class="tab-content">
+    <div class="card">
+      <h2>Métiers</h2>
+
+      <label>Nom de l'objet :</label>
+      <input type="text" id="nomObjet" placeholder="Ex : Potion de soin">
+
+      <label>Type :</label>
+      <select id="typeCraft">
+        <option value="forge">Forge</option>
+        <option value="cuisine">Cuisine</option>
+        <option value="alchimie">Alchimie (pas d’assistant)</option>
+      </select>
+
+      <label>Niveau métier :</label>
+      <input type="number" id="niveauMetier" value="1" min="0">
+
+      <label>Quantité à produire :</label>
+      <input type="number" id="quantiteCraft" value="1" min="1">
+
+      <label>Ingrédients par création :</label>
+      <input type="number" id="nbIngredients" value="1" min="1">
+
+      <label>Outil :</label>
+      <select id="outilCraft">
+        <option value="0">Basique (+0)</option>
+        <option value="1">Amélioré (+1)</option>
+        <option value="2">Maître (+2)</option>
+      </select>
+
+      <label>Durabilité outil :</label>
+      <input type="number" id="durabiliteCraft" value="10" min="0">
+
+      <label>Assistant :</label>
+      <select id="assistantCraft">
+        <option value="none">Seul</option>
+        <option value="apprenti">Apprenti</option>
+        <option value="maitre">Maître</option>
+      </select>
+
+      <button onclick="lancerCraft()">🎲 Lancer la production</button>
+
+      <div id="resultatCraft" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;">
+        Résultat ici...
+      </div>
+    <button id="copyCraftBtn" style="display:none;">📋 Copier</button>
+  </div>
+</div>
+
 
     <!-- Historique partagé -->
     <h3 id="historicTitle">Historique des lancers</h3>
