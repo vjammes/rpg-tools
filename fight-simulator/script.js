@@ -127,16 +127,9 @@ if (persoSelectEl) {
 // ============================================
 // Récupérer tous les sélecteurs qui influencent l'affichage de la sidebar
 
-// const selectsPerso = [
-//   document.getElementById('personnage'),   // Onglet Personnage
-//   document.getElementById('ciblePNJ'),     // Onglet Ennemi
-//   document.getElementById('nomChasseur')   // Onglet Chasse
-// ];
-
 const selectsPerso = document.querySelectorAll(
   "#personnage, #ciblePNJ, #nomChasseur, #personnageStats"
 );
-
 
 const statsDiv = document.getElementById('statsPerso');
 const armeSelect = document.getElementById('arme');
@@ -1333,7 +1326,3 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btnCrochetage");
   if (btn) btn.addEventListener("click", lancerCrochetage);
 });
-
-
-
-
