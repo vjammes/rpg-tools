@@ -30,18 +30,29 @@ body {
   font-size: 1.2em;
 }
 
-.sidebar table {
+/* Tables globales (plus dépendantes de la sidebar) */
+table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 15px;
   font-size: 0.9em;
 }
 
-.sidebar th,
-.sidebar td {
+th,
+td {
   border: 1px solid #ddd;
-  padding: 6px;
+  padding: 8px;
   text-align: center;
+}
+
+th {
+  background: #16406A;
+  color: white;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-bottom: 10px;
 }
 
 /* En-tête de sidebar avec croix alignée */

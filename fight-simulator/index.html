@@ -7,20 +7,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <button id="menuToggle" class="menu-toggle">☰ Menu</button>
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <h3 id="statsTitle"></h3>
-      <button type="button" class="close-sidebar" aria-label="Fermer le menu">×</button>
-    </div>
-
-    <div id="statsPerso">Sélectionnez un personnage</div>
-  </div>
-
-
-  <!-- Overlay sombre derrière la sidebar -->
-  <div class="overlay"></div>
-
   <div class="container">
     
     <select id="tabSelect" class="tab-select">
@@ -29,6 +15,7 @@
       <option value="chasse">🏹 Chasse</option>
       <option value="crochetage">🔑 Crochetage</option>
       <option value="craft">🛠️ Artisanat</option>
+      <option value="stats">📊 Stats</option>
     </select>
 
     <!-- Onglets -->
@@ -38,6 +25,7 @@
       <button class="tab-button" data-tab="chasse">🏹 <br>Chasse</button>
       <button class="tab-button" data-tab="crochetage">🔑 <br>Crochetage</button>
       <button class="tab-button" data-tab="craft">🛠️ <br>Artisanat</button>
+      <button class="tab-button" data-tab="stats">📊 <br>Stats</button>
     </div>
 
     <!-- Onglet Personnages -->
@@ -245,50 +233,62 @@
       <h2>Artisanat</h2>
 
       <label>Nom de l'objet :</label>
-      <input type="text" id="nomObjet" placeholder="Ex : Potion de soin">
+        <input type="text" id="nomObjet" placeholder="Ex : Potion de soin">
 
-      <label>Type :</label>
-      <select id="typeCraft">
-        <option value="forge">Forge</option>
-        <option value="cuisine">Cuisine</option>
-        <option value="alchimie">Alchimie (pas d’assistant)</option>
-      </select>
+        <label>Type :</label>
+        <select id="typeCraft">
+          <option value="forge">Forge</option>
+          <option value="cuisine">Cuisine</option>
+          <option value="alchimie">Alchimie (pas d’assistant)</option>
+        </select>
 
-      <label>Niveau métier :</label>
-      <input type="number" id="niveauMetier" value="1" min="0">
+        <label>Niveau métier :</label>
+        <input type="number" id="niveauMetier" value="1" min="0">
 
-      <label>Quantité à produire :</label>
-      <input type="number" id="quantiteCraft" value="1" min="1">
+        <label>Quantité à produire :</label>
+        <input type="number" id="quantiteCraft" value="1" min="1">
 
-      <label>Ingrédients par création :</label>
-      <input type="number" id="nbIngredients" value="1" min="1">
+        <label>Ingrédients par création :</label>
+        <input type="number" id="nbIngredients" value="1" min="1">
 
-      <label>Outil :</label>
-      <select id="outilCraft">
-        <option value="0">Basique (+0)</option>
-        <option value="1">Amélioré (+1)</option>
-        <option value="2">Maître (+2)</option>
-      </select>
+        <label>Outil :</label>
+        <select id="outilCraft">
+          <option value="0">Basique (+0)</option>
+          <option value="1">Amélioré (+1)</option>
+          <option value="2">Maître (+2)</option>
+        </select>
 
-      <label>Durabilité outil :</label>
-      <input type="number" id="durabiliteCraft" value="10" min="0">
+        <label>Durabilité outil :</label>
+        <input type="number" id="durabiliteCraft" value="10" min="0">
 
-      <label>Assistant :</label>
-      <select id="assistantCraft">
-        <option value="none">Seul</option>
-        <option value="apprenti">Apprenti</option>
-        <option value="maitre">Maître</option>
-      </select>
+        <label>Assistant :</label>
+        <select id="assistantCraft">
+          <option value="none">Seul</option>
+          <option value="apprenti">Apprenti</option>
+          <option value="maitre">Maître</option>
+        </select>
 
-      <button onclick="lancerCraft()">🎲 Lancer la production</button>
+        <button onclick="lancerCraft()">🎲 Lancer la production</button>
 
-      <div id="resultatCraft" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;">
-        Résultat ici...
-      </div>
-    <button id="copyCraftBtn" style="display:none;">📋 Copier</button>
+        <div id="resultatCraft" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;">
+          Résultat ici...
+        </div>
+      <button id="copyCraftBtn" style="display:none;">📋 Copier</button>
+    </div>
   </div>
-</div>
+  <div id="tab-stats" class="tab-content">
+    <div class="card">
+      <h2>Stats du personnage</h2>
 
+      <label for="personnageStats">Personnage :</label>
+      <select id="personnageStats">
+        <option value="brakmar">Brakmar</option>
+        <option value="draner">Drânër</option>
+      </select>
+
+      <div id="statsPerso"></div>
+    </div>
+  </div>
 
     <!-- Historique partagé -->
     <h3 id="historicTitle">Historique des lancers</h3>

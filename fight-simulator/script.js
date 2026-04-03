@@ -127,11 +127,17 @@ if (persoSelectEl) {
 // ============================================
 // Récupérer tous les sélecteurs qui influencent l'affichage de la sidebar
 
-const selectsPerso = [
-  document.getElementById('personnage'),   // Onglet Personnage
-  document.getElementById('ciblePNJ'),     // Onglet Ennemi
-  document.getElementById('nomChasseur')   // Onglet Chasse
-];
+// const selectsPerso = [
+//   document.getElementById('personnage'),   // Onglet Personnage
+//   document.getElementById('ciblePNJ'),     // Onglet Ennemi
+//   document.getElementById('nomChasseur')   // Onglet Chasse
+// ];
+
+const selectsPerso = document.querySelectorAll(
+  "#personnage, #ciblePNJ, #nomChasseur, #personnageStats"
+);
+
+
 const statsDiv = document.getElementById('statsPerso');
 const armeSelect = document.getElementById('arme');
 const historiqueDiv = document.getElementById('historique');
@@ -150,7 +156,13 @@ function afficherStats() {
   const statsDiv = document.getElementById('statsPerso');
 
   // Trouver la valeur d’un sélecteur qui correspond à un perso existant
-  let persoId = selectsPerso.map(sel => sel.value).find(val => gameData.personnages[val]);
+  let persoId = null;
+
+selectsPerso.forEach(sel => {
+  if (!persoId && gameData.personnages[sel.value]) {
+    persoId = sel.value;
+  }
+});
 
   if (!persoId) {
     statsDiv.innerHTML = "Sélectionnez un personnage";
@@ -497,7 +509,6 @@ function attaquePerso() {
 // =====================================================
 // 👆 9) Initialisation du sélecteur personnage pour tests
 // =====================================================
-// const persoSelectEl = document.getElementById('personnage');
 if (persoSelectEl) {
   updateTestOptions(persoSelectEl.value);
   persoSelectEl.addEventListener('change', e => updateTestOptions(e.target.value));
@@ -1157,29 +1168,6 @@ document.addEventListener("DOMContentLoaded", function () {
   updateTestLabels();
 });
 
-  // === MENU TOGGLE + OVERLAY ===
-  const menuToggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".overlay");
-  const closeSidebar = document.querySelector(".close-sidebar");
-
-  function toggleSidebar() {
-    sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show");
-  }
-
-  if (menuToggle && sidebar) {
-    menuToggle.addEventListener("click", toggleSidebar);
-  }
-
-  if (closeSidebar) {
-    closeSidebar.addEventListener("click", toggleSidebar);
-  }
-
-  if (overlay) {
-    overlay.addEventListener("click", toggleSidebar);
-  }
-
   // === GESTION AFFICHAGE CT SI ATTAQUE À DISTANCE ===
   const attackTypePNJSelect = document.getElementById('attackTypePNJSelect');
   const ctPNJContainer = document.getElementById('ctPNJContainer');
@@ -1313,20 +1301,6 @@ addCopyButton("copyCrochetageBtn", ["resultatCrochetage"]);
       }
     });
   });
-
-// // (Duplicata d’onglets
-// const tabs = document.querySelectorAll('.tab-button');
-// const contents = document.querySelectorAll('.tab-content');
-
-// tabs.forEach((tab, idx) => {
-//   tab.addEventListener('click', () => {
-//     tabs.forEach(t => t.classList.remove('active'));
-//     contents.forEach(c => c.classList.remove('active'));
-//     tab.classList.add('active');
-//     contents[idx].classList.add('active');
-//   });
-// });
-
 
   // === GESTION DES BONUS CHASSE ===
 document.addEventListener("DOMContentLoaded", () => {
