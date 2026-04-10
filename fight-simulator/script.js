@@ -16,7 +16,7 @@ const gameData = {
       ca: 13,
       reducphy: 2,
       reducmag: 0,
-      pv: 29,
+      pv: 30,
       pistage: 0,
       chasse: 0,
       armurier:0,
