@@ -66,8 +66,9 @@ function hydratePersonnages() {
     perso.bonusJetFor = Math.floor(perso.for / 5);  // +1 tous les 5 FOR
     perso.bonusJetAgi = Math.floor(perso.agi / 5);  // +1 tous les 5 AGI
     perso.bonusJetInt = Math.floor(perso.int / 5);  // +1 tous les 5 INT
-    perso.bonusJetCha = Math.floor(perso.cha / 3);  // +1 tous les 3 CHA
     perso.bonusJetEnd = Math.floor(perso.end / 5);  // +1 tous les 5 END
+    perso.bonusJetCha = Math.floor(perso.cha / 3);  // +1 tous les 3 CHA
+
 
     // --- Spécial ---
     perso.bonusApprivoiser = Math.floor(perso.cha / 5); // compagnons
