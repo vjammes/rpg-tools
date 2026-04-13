@@ -15,6 +15,7 @@
       <option value="chasse">🏹 Chasse</option>
       <option value="crochetage">🔑 Crochetage</option>
       <option value="craft">🛠️ Artisanat</option>
+      <option value="mine">⛏️ Mine</option>
       <option value="stats">📊 Stats</option>
     </select>
 
@@ -25,6 +26,7 @@
       <button class="tab-button" data-tab="chasse">🏹 <br>Chasse</button>
       <button class="tab-button" data-tab="crochetage">🔑 <br>Crochetage</button>
       <button class="tab-button" data-tab="craft">🛠️ <br>Artisanat</button>
+      <button class="tab-button" data-tab="mine">⛏️ <br>Mine</button>
       <button class="tab-button" data-tab="stats">📊 <br>Stats</button>
     </div>
 
@@ -278,6 +280,44 @@
       <button id="copyCraftBtn" style="display:none;">📋 Copier</button>
     </div>
   </div>
+
+  <div id="tab-mine" class="tab-content">
+  <div class="card">
+    <h2>⛏️ Exploitation minière</h2>
+
+    <label>Personnage :</label>
+    <select id="mineurSelect">
+      <option value="brakmar">Brakmar</option>
+      <option value="draner">Drânër</option>
+    </select>
+
+    <label>PV actuels :</label>
+    <input type="number" id="pvMineur" value="20">
+
+    <label>XP cumulée :</label>
+    <input type="number" id="xpMineur" value="0">
+
+    <label>Type de mine :</label>
+    <select id="typeMine">
+      <option value="decouverte">Découverte (dangereuse)</option>
+      <option value="connue">Connue</option>
+      <option value="securisee">Sécurisée</option>
+    </select>
+
+    <label>Durée (heures) :</label>
+    <input type="number" id="tempsMine" value="5" min="1" max="24">
+
+    <label>Minerai ciblé :</label>
+    <select id="mineraiSelect">
+      <option value="random">🎲 Filon aléatoire</option>
+    </select>
+
+    <button onclick="lancerMine()">⛏️ Lancer l'exploitation</button>
+
+    <div id="resultatMine" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;"></div>
+  </div>
+</div>
+
   <div id="tab-stats" class="tab-content">
     <div class="card">
       <h2>Stats du personnage</h2>

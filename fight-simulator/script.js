@@ -1119,7 +1119,385 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// =====================================================
+// ⛏️ 15) DONNÉES MINEUR
+// =====================================================
+// =====================================================
+// ⛏️ MODULE MINEUR COMPLET
+// =====================================================
 
+
+// =====================================================
+// 📊 1) XP & NIVEAU (FORMULE DYNAMIQUE 1 → 100)
+// =====================================================
+
+// XP nécessaire pour passer au niveau suivant
+function xpPourNiveau(niveau) {
+  return Math.floor(50 * Math.pow(1.5 - (niveau * 0.001), niveau - 1));
+}
+
+// Calcule le niveau à partir de l’XP cumulée
+function getNiveauMineur(xp) {
+  let niveau = 1;
+  let cumul = 0;
+
+  while (niveau < 100) {
+    const xpNext = xpPourNiveau(niveau);
+    cumul += xpNext;
+
+    if (xp < cumul) return niveau;
+    niveau++;
+  }
+
+  return 100;
+}
+
+// Donne la progression dans le niveau actuel
+function getProgressionMineur(xp) {
+  let niveau = 1;
+  let cumul = 0;
+
+  while (niveau < 100) {
+    const xpNext = xpPourNiveau(niveau);
+
+    if (xp < cumul + xpNext) {
+      return {
+        niveau: niveau,
+        xpActuel: xp - cumul,
+        xpRequis: xpNext
+      };
+    }
+
+    cumul += xpNext;
+    niveau++;
+  }
+
+  return { niveau: 100, xpActuel: 0, xpRequis: 0 };
+}
+
+
+// =====================================================
+// ⛏️ 2) RESSOURCES DISPONIBLES
+// =====================================================
+
+const ressourcesMineur = [
+  { nom: "Fer", xp: 2 },
+  { nom: "Cuivre", xp: 4 },
+  { nom: "Bronze", xp: 8 },
+  { nom: "Kobalte", xp: 16 },
+  { nom: "Manganèse", xp: 32 },
+  { nom: "Étain", xp: 64 },
+  { nom: "Argent", xp: 128 },
+  { nom: "Bauxite", xp: 256 },
+  { nom: "Or", xp: 512 },
+  { nom: "Obsidienne", xp: 1024 }
+];
+
+
+// =====================================================
+// 📋 3) MISE À JOUR DU SELECT MINERAIS
+// =====================================================
+
+function updateMineraisMineur() {
+
+  const xpInput = document.getElementById("xpMineur");
+  const select = document.getElementById("mineraiSelect");
+
+  if (!xpInput || !select) return;
+
+  const xp = parseInt(xpInput.value, 10) || 0;
+  const niveau = getNiveauMineur(xp);
+
+  // Reset
+  select.innerHTML = "";
+
+  // Option aléatoire
+  const optRandom = document.createElement("option");
+  optRandom.value = "random";
+  optRandom.textContent = "🎲 Filon aléatoire";
+  select.appendChild(optRandom);
+
+  // Ajout minerais selon niveau
+  ressourcesMineur.forEach((res, index) => {
+    if (niveau >= index + 1) {
+      const opt = document.createElement("option");
+      opt.value = index;
+      opt.textContent = res.nom;
+      select.appendChild(opt);
+    }
+  });
+}
+
+// Initialisation
+const xpMineurInput = document.getElementById("xpMineur");
+if (xpMineurInput) {
+  xpMineurInput.addEventListener("input", updateMineraisMineur);
+  updateMineraisMineur();
+}
+
+
+// =====================================================
+// 🎲 4) FILON ALÉATOIRE (MINE DÉCOUVERTE)
+// =====================================================
+
+function getMineraiAleatoire(niveau) {
+  const dispo = ressourcesMineur.slice(0, niveau);
+  const index = Math.floor(Math.random() * dispo.length);
+  return dispo[index];
+}
+
+
+// =====================================================
+// 🎲 5) EXPLOITATION MINIÈRE (LOGIQUE PRINCIPALE)
+// =====================================================
+
+function lancerMine() {
+
+  // ============================================
+  // 🔹 Récupération des données
+  // ============================================
+
+  const persoId = document.getElementById("mineurSelect").value;
+  const perso = gameData.personnages[persoId];
+
+  let pv = parseInt(document.getElementById("pvMineur").value, 10) || perso.pv;
+  let xpTotal = parseInt(document.getElementById("xpMineur").value, 10) || 0;
+  let heures = parseInt(document.getElementById("tempsMine").value, 10) || 1;
+
+  const typeMine = document.getElementById("typeMine").value;
+  const choixMinerai = document.getElementById("mineraiSelect").value;
+
+  // ============================================
+  // 🔹 Variables de simulation
+  // ============================================
+
+  let log = [];
+  let degatsTotal = 0;
+  let xpGagne = 0;
+  let inventaire = {};
+  let heureGlobale = 1;
+
+  const nom = perso.nom;
+
+// ============================================
+// ⛏️ INTRO + GESTION DU TEMPS
+// ============================================
+
+log.push(`⛏️ ${nom} s’enfonce dans une mine sombre et instable...`);
+
+// 🕐 Descente obligatoire
+heures -= 1;
+log.push(`🕐 🕐 Heure ${heureGlobale} : Préparation et descente (-1h)`);
+heureGlobale++;
+
+// ============================================
+// 🔍 RECHERCHE DE FILON SELON TYPE DE MINE
+// ============================================
+
+// Descente
+heures -= 1;
+log.push(`🕐 Heure ${heureGlobale} : Recherche d'un filon (-1h)`);
+heureGlobale++;
+
+// Mine connue
+if (typeMine === "connue") {
+
+  heures -= 1;
+  log.push(`🕐 Heure ${heureGlobale} : ${nom} repère un filon (-1h)`);
+  heureGlobale++;
+
+}
+
+// Mine découverte
+else if (typeMine === "decouverte") {
+
+  const recherche = rollDice("1d6");
+
+  log.push(`🔍 Exploration hasardeuse...`);
+
+  for (let i = 0; i < recherche.total; i++) {
+    heures -= 1;
+
+    log.push(`🕐 Heure ${heureGlobale} : progression difficile dans la mine...`);
+    heureGlobale++;
+  }
+
+  if (recherche.total > 2) {
+    log.push(`🧭 ${nom} se perd dans les galeries...`);
+  } else {
+    log.push(`🧭 ${nom} trouve rapidement un filon.`);
+  }
+}
+
+// 🟢 Mine sécurisée → rien à faire
+
+// ============================================
+// ⛔ Vérification temps restant
+// ============================================
+
+if (heures <= 0) {
+  document.getElementById("resultatMine").textContent =
+`⛏️ EXPÉDITION ÉCHOUÉE
+
+${log.join("\n")}
+
+⏳ ${nom} n’a pas trouvé de filon exploitable à temps...`;
+
+  return;
+}
+
+  // ============================================
+  // 🔄 Boucle heure par heure
+  // ============================================
+
+  for (let h = 1; h <= heures; h++, heureGlobale++) {
+
+    if (pv <= 0) break;
+
+    log.push(`\n⛏️ Heure ${heureGlobale}`);
+
+    let bonusCrit = 0;
+
+    // ============================================
+    // 💥 ÉBOULEMENT
+    // ============================================
+
+    if (typeMine !== "securisee" && Math.random() < 0.25) {
+
+      log.push(`💥 Un grondement... la roche s’effondre !`);
+
+      const jet = rollDice("1d20");
+      const total = jet.total + perso.bonusJetAgi;
+      const seuil = (typeMine === "decouverte") ? 15 : 10;
+
+      log.push(`🎲 AGI : ${jet.rolls[0]} + ${perso.bonusJetAgi} = ${total} / ${seuil}`);
+
+      // 🎯 CRIT AGI
+      if (jet.rolls[0] === 20) {
+        bonusCrit = 5;
+        log.push(`✨ Réflexe parfait ! (+5 ressources)`);
+      }
+
+      if (total < seuil) {
+
+        const dmgRoll = rollDice(typeMine === "decouverte" ? "4d6" : "3d6");
+        const dmg = dmgRoll.total;
+
+        pv -= dmg;
+        degatsTotal += dmg;
+
+        log.push(`💀 ${nom} est enseveli !`);
+        log.push(`💥 Dégâts : [${dmgRoll.rolls.join(", ")}] = ${dmg}`);
+
+        // ============================================
+        // 🪨 DÉGAGEMENT
+        // ============================================
+
+        let bloque = true;
+
+        while (bloque && pv > 0 && h <= heures) {
+
+          const jetF = rollDice("1d20");
+          const totalF = jetF.total + perso.bonusJetFor;
+
+          log.push(`🎲 FOR : ${jetF.rolls[0]} + ${perso.bonusJetFor} = ${totalF} / 10`);
+
+          // 🎯 CRIT FOR
+          if (jetF.rolls[0] === 20) {
+            log.push(`💪 Force héroïque ! Libération instantanée !`);
+            break;
+          }
+
+          if (totalF >= 10) {
+            log.push(`💪 ${nom} se libère des débris.`);
+            bloque = false;
+          } else {
+            log.push(`⏳ Coincé... 1h perdue.`);
+            heureGlobale++;
+            heures--;
+            log.push(`🕐 Heure ${heureGlobale} : toujours coincé...`);          }
+        }
+      } else {
+        log.push(`🌀 ${nom} évite l’éboulement.`);
+      }
+    }
+
+    if (pv <= 0) break;
+
+    // ============================================
+    // ⛏️ CHOIX DU FILON
+    // ============================================
+
+    const niveau = getNiveauMineur(xpTotal);
+    let minerai;
+
+        // 🎲 Filon aléatoire (UNIQUEMENT si choisi)
+    if (choixMinerai === "random") {
+
+      minerai = getMineraiAleatoire(niveau);
+      log.push(`🎲 Filon instable → ${minerai.nom}`);
+
+    } else {
+
+      const index = parseInt(choixMinerai, 10);
+
+      if (!isNaN(index) && ressourcesMineur[index]) {
+        minerai = ressourcesMineur[index];
+      }
+    }
+
+    // 🔒 Sécurité anti-crash
+    if (!minerai) {
+      log.push(`❌ Aucun filon exploitable trouvé.`);
+      continue;
+    }
+
+    // ============================================
+    // ⛏️ EXTRACTION
+    // ============================================
+
+    const roll = rollDice(`1d${Math.min(10, niveau)}`);
+    const quantite = roll.total + bonusCrit;
+
+    if (!inventaire[minerai.nom]) inventaire[minerai.nom] = 0;
+    inventaire[minerai.nom] += quantite;
+
+    const gain = quantite * minerai.xp;
+    xpGagne += gain;
+    xpTotal += gain;
+
+    log.push(`⛏️ Extraction : [${roll.rolls.join(", ")}] → ${quantite} ${minerai.nom}`);
+    log.push(`✨ +${gain} XP`);
+  }
+
+  // ============================================
+  // 📊 RÉSULTAT FINAL
+  // ============================================
+
+  const progression = getProgressionMineur(xpTotal);
+
+  const recap = Object.entries(inventaire)
+    .map(([k, v]) => `${v} ${k}`)
+    .join(", ");
+
+  const resultat =
+`⛏️ RÉSULTAT DE L'EXPLOITATION
+
+${log.join("\n")}
+
+━━━━━━━━━━━━━━━
+📦 Minerais : ${recap || "Aucun"}
+💔 Dégâts : ${degatsTotal}
+✨ XP gagnée : ${xpGagne}
+📊 XP totale : ${xpTotal}
+
+🎯 Niveau : ${progression.niveau}
+📈 Progression : ${progression.xpActuel} / ${progression.xpRequis}
+
+❤️ PV restants : ${pv}`;
+
+  document.getElementById("resultatMine").textContent = resultat;
+}
 
 // =====================================================
 // 🧭 17) Initialisations DOMContentLoaded (updateTestLabels, menu, onglets, CT distance…)
