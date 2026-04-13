@@ -1122,10 +1122,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // =====================================================
 // ⛏️ 15) DONNÉES MINEUR
 // =====================================================
-// =====================================================
-// ⛏️ MODULE MINEUR COMPLET
-// =====================================================
-
 
 // =====================================================
 // 📊 1) XP & NIVEAU (FORMULE DYNAMIQUE 1 → 100)
@@ -1287,7 +1283,7 @@ log.push(`⛏️ ${nom} s’enfonce dans une mine sombre et instable...`);
 
 // 🕐 Descente obligatoire
 heures -= 1;
-log.push(`🕐 🕐 Heure ${heureGlobale} : Préparation et descente (-1h)`);
+log.push(`🕐 Heure ${heureGlobale} : Préparation et descente (-1h)`);
 heureGlobale++;
 
 // ============================================
@@ -1498,6 +1494,7 @@ ${log.join("\n")}
 
   document.getElementById("resultatMine").textContent = resultat;
 }
+
 
 // =====================================================
 // 🧭 17) Initialisations DOMContentLoaded (updateTestLabels, menu, onglets, CT distance…)
