@@ -48,15 +48,18 @@
           <optgroup label="Armes de corps à corps">
             <option value="1d6" data-type="cac">Épée courte (1d6)</option>
             <option value="1d8" data-type="cac">Épée longue (1d8)</option>
-            <option value="1d10" data-type="cac">Marteau de guerre (1d10)</option>
-            <option value="1d8-1" data-type="cac">Rapière (1d8-1)</option>
+            <option value="1d8+5" data-type="cac">Épée courte Cpt (1d8+5)</option>
+<!--             <option value="1d10" data-type="cac">Marteau de guerre (1d10)</option>
+            <option value="1d8-1" data-type="cac">Rapière (1d8-1)</option> -->
             <option value="1d6+3" data-type="cac">*Brutalité* (1d6+3)</option>
             <option value="2d6" data-type="cac">*Coup puissant* (2d6)</option>
           </optgroup>
           <optgroup label="Armes à distance">
             <option value="1d6" data-type="distance">Arc court (1d6)</option>
             <option value="1d8" data-type="distance">Arc long (1d8)</option>
+            <option value="1d8+6" data-type="distance">Arc court Cpt (1d8+6)</option>
             <option value="1d10" data-type="distance">Arbalète (1d10)</option>
+            <option value="1d4+2" data-type="distance">Hachette (1d4+2)</option>
             <option value="2d6" data-type="distance">*Tir précis* (2d6)</option>
             <option value="3d6" data-type="distance">*Salve de flèches* (3d6)</option>
           </optgroup>
@@ -299,9 +302,9 @@
 
     <label>Type de mine :</label>
     <select id="typeMine">
-      <option value="decouverte">Découverte (dangereuse)</option>
+      <option value="inconnue">Inconnue (dangereuse)</option>
       <option value="connue">Connue</option>
-      <option value="securisee">Sécurisée</option>
+      <option value="sécurisée">Sécurisée</option>
     </select>
 
     <label>Durée (heures) :</label>
@@ -315,6 +318,8 @@
     <button onclick="lancerMine()">⛏️ Lancer l'exploitation</button>
 
     <div id="resultatMine" style="margin-top:20px; white-space:pre-line; border:1px solid #ccc; padding:10px;"></div>
+
+    <button id="copyMineBtn" onclick="copyMineResult()" style="display:none;">📋 Copier</button>
   </div>
   </div>
 

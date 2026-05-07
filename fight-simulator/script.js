@@ -1279,7 +1279,7 @@ function lancerMine() {
 // ⛏️ INTRO + GESTION DU TEMPS
 // ============================================
 
-log.push(`⛏️ ${nom} s’enfonce dans une mine sombre et instable...`);
+log.push(`⛏️ ${nom} s’enfonce dans une mine ${typeMine}`);
 
 // 🕐 Descente obligatoire
 heures -= 1;
@@ -1305,7 +1305,7 @@ if (typeMine === "connue") {
 }
 
 // Mine découverte
-else if (typeMine === "decouverte") {
+else if (typeMine === "inconnue") {
 
   const recherche = rollDice("1d6");
 
@@ -1364,7 +1364,7 @@ ${log.join("\n")}
 
       const jet = rollDice("1d20");
       const total = jet.total + perso.bonusJetAgi;
-      const seuil = (typeMine === "decouverte") ? 15 : 10;
+      const seuil = (typeMine === "inconnue") ? 15 : 10;
 
       log.push(`🎲 AGI : ${jet.rolls[0]} + ${perso.bonusJetAgi} = ${total} / ${seuil}`);
 
@@ -1376,7 +1376,7 @@ ${log.join("\n")}
 
       if (total < seuil) {
 
-        const dmgRoll = rollDice(typeMine === "decouverte" ? "4d6" : "3d6");
+        const dmgRoll = rollDice(typeMine === "inconnue" ? "4d6" : "3d6");
         const dmg = dmgRoll.total;
 
         pv -= dmg;
